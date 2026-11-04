@@ -344,6 +344,58 @@ dialog.zm{width:min(900px,96vw);padding:12px}
 #drawer.bs{top:auto;left:0;right:0;bottom:0;width:auto;height:86%;border-radius:22px 22px 0 0;border-left:0;border-top:1px solid rgba(255,255,255,.22);transform:translateY(105%);box-shadow:0 -12px 40px rgba(0,0,0,.35)}
 #drawer.bs.open{transform:none}
 #drawer.bs .hdl{display:block;width:42px;height:4px;border-radius:2px;background:rgba(255,255,255,.45);margin:8px auto 0}
+
+/* ===== v9: Chottu light-glass cart + menu (brand colours) ===== */
+:root{--glass:rgba(255,247,226,.58);--glass-edge:rgba(255,255,255,.75);--glass-card:rgba(255,255,255,.55);--glass-ink:#3f5c57}
+
+/* ---- Cart: frosted glass tinted with the logo colours ---- */
+#drawer{
+  background:
+    radial-gradient(120% 60% at 0% 0%,rgba(232,162,13,.28),transparent 60%),
+    radial-gradient(90% 55% at 100% 35%,rgba(59,166,218,.24),transparent 65%),
+    radial-gradient(100% 55% at 0% 100%,rgba(243,112,94,.24),transparent 60%),
+    var(--glass);
+  -webkit-backdrop-filter:blur(22px) saturate(1.7);backdrop-filter:blur(22px) saturate(1.7);
+  color:var(--glass-ink);border-left:1px solid var(--glass-edge);
+  box-shadow:-10px 0 40px rgba(63,92,87,.18)}
+#drawer.bs{border-top:1px solid var(--glass-edge);box-shadow:0 -12px 40px rgba(63,92,87,.22)}
+#drawer.bs .hdl{background:rgba(63,92,87,.35)}
+#drawer .note{color:rgba(63,92,87,.72)}
+#drawer .dh .ib{background:rgba(255,255,255,.65);color:var(--glass-ink)}
+#drawer .fd{background:var(--glass-card);color:var(--glass-ink)}
+#drawer .fd i{background:rgba(63,92,87,.14)}
+#drawer .di,#drawer .sc{background:var(--glass-card);border:1px solid var(--glass-edge)}
+#drawer .qty{background:rgba(255,255,255,.7)}
+#drawer .qty button{color:var(--glass-ink)}
+#drawer .clp{border:1px solid var(--glass-edge);background:rgba(255,255,255,.6);color:var(--glass-ink)}
+#drawer .sc .pl{background:var(--gr);color:#fff}
+#drawer .df{background:rgba(255,255,255,.4);border-top:1px solid var(--glass-edge)}
+#drawer .tot{color:rgba(63,92,87,.8)}#drawer .tot b{color:var(--glass-ink)}
+#drawer .df .p{background:var(--gr);border-color:var(--gr);color:#fff;box-shadow:0 6px 16px rgba(58,166,108,.35)}
+#drawer .df .vc{color:var(--glass-ink)}
+#dov{background:rgba(63,92,87,.22)}
+
+/* ---- Menu (phone slide-out): same glass look ---- */
+@media(max-width:900px){
+  nav{
+    background:
+      radial-gradient(120% 45% at 0% 0%,rgba(232,162,13,.28),transparent 60%),
+      radial-gradient(100% 45% at 100% 60%,rgba(59,166,218,.22),transparent 65%),
+      radial-gradient(110% 45% at 0% 100%,rgba(243,112,94,.22),transparent 60%),
+      var(--glass);
+    -webkit-backdrop-filter:blur(22px) saturate(1.7);backdrop-filter:blur(22px) saturate(1.7);
+    border-right:1px solid var(--glass-edge);box-shadow:8px 0 36px rgba(63,92,87,.2)}
+  nav button{color:var(--glass-ink);border-bottom:1px solid rgba(63,92,87,.14);display:flex;align-items:center;gap:12px}
+  nav button::before{content:"";width:10px;height:10px;border-radius:50%;flex:none;background:var(--mu)}
+  nav button:nth-child(4n+2)::before{background:var(--gr)}
+  nav button:nth-child(4n+3)::before{background:var(--co)}
+  nav button:nth-child(4n)::before{background:var(--sk)}
+}
+
+/* ---- Top bar: glass on computers only (on phones it would break the slide-out menu) ---- */
+@media(min-width:901px){
+  header{background:rgba(255,255,255,.62);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);border-bottom:1px solid var(--glass-edge)}
+}
 </style>
 <script>document.documentElement.className="js"</script>
 </head>
