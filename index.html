@@ -458,6 +458,25 @@ button.atc[data-addp]:disabled{background:#e9e4d8;border-color:#e9e4d8;color:var
 .er{color:var(--co)}.ok,.step.done{color:var(--gr)}
 .tag{background:#fff;color:var(--ink);border:1px solid var(--gr)}
 footer,footer p,footer button,footer .copy,footer h3{color:var(--ink)}
+
+/* ===== v13: floating glass search panel with live results ===== */
+.search{position:fixed;top:84px;left:50%;transform:translateX(-50%);width:min(560px,calc(100vw - 20px));max-height:min(72vh,540px);overflow:auto;
+  z-index:37;padding:12px;border-radius:24px;border:1px solid rgba(255,255,255,.8);
+  background:radial-gradient(120% 70% at 0% 0%,rgba(232,162,13,.22),transparent 60%),radial-gradient(100% 60% at 100% 100%,rgba(59,166,218,.2),transparent 65%),rgba(255,247,226,.82);
+  -webkit-backdrop-filter:blur(22px) saturate(1.7);backdrop-filter:blur(22px) saturate(1.7);box-shadow:0 14px 40px rgba(63,92,87,.22)}
+.search[hidden]{display:none}
+.search input{width:100%;max-width:none;margin:0;border:1.5px solid rgba(63,92,87,.25);border-radius:999px;padding:12px 18px;background:rgba(255,255,255,.88);color:var(--ink);font:inherit}
+#sres{display:grid;gap:2px;margin-top:8px}
+#sres:empty{display:none}
+.sx{display:flex;align-items:center;gap:12px;padding:8px;border-radius:16px;color:var(--ink);text-decoration:none}
+.sx:hover,.sx:focus-visible{background:rgba(255,255,255,.65)}
+.sxt{width:48px;height:60px;border-radius:10px;overflow:hidden;background:var(--soft);flex:none}
+.sxt img{width:100%;height:100%;object-fit:cover;display:block}
+.sx b{display:block;font-weight:700}.sx small{color:var(--mut);font-size:.85rem}
+.sxn{padding:14px 10px;color:var(--mut);text-align:center;margin:0}
+.sxa{margin:6px auto 2px}
+/* dim the page behind an open menu; tapping it closes the menu */
+body.nav-open::after{content:"";position:fixed;inset:0;background:rgba(63,92,87,.28);z-index:19}
 </style>
 <script>document.documentElement.className="js"</script>
 </head>
@@ -474,7 +493,7 @@ footer,footer p,footer button,footer .copy,footer h3{color:var(--ink)}
   <button class="ib" data-go="track" aria-label="Track order"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6h14v11H1zM15 10h4l3 3v4h-7"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></button>
   <button class="ib" data-drawer aria-label="Open cart"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 13H6zM9 8a3 3 0 0 1 6 0"/></svg><span id="cnt">0</span></button></div>
 </header>
-<div class="search" id="sbox" hidden><input id="q" type="search" placeholder="Search products" aria-label="Search products"></div>
+<div class="search" id="sbox" hidden><input id="q" type="search" placeholder="Search products" aria-label="Search products" autocomplete="off"><div id="sres"></div></div>
 <nav class="steps" id="steps" aria-label="Checkout steps" hidden></nav>
 
 <div id="v-home">
@@ -604,23 +623,23 @@ function closeDrawer(){$('#drawer').classList.remove('open');$('#dov').classList
 addEventListener('scroll',()=>{const y=scrollY,n=sm?y>20:y>90;
   if(n!==sm){if(!sm)H=hd.offsetHeight;sm=n;hd.classList.toggle('sm',sm);hd.style.marginBottom=sm?Math.max(0,H-hd.offsetHeight)+'px':''}
   const dn=y>ly+4,up=y<ly-4;
-  if(dn&&y>160&&!$('#nav').classList.contains('open')&&!$('#sbox').offsetParent)hd.classList.add('hide');else if(up||y<100)hd.classList.remove('hide');
+  if(dn&&y>160&&!$('#nav').classList.contains('open')&&$('#sbox').hidden)hd.classList.add('hide');else if(up||y<100)hd.classList.remove('hide');
   if(dn||up)ly=y;
   hd.style.setProperty('--p',(y/Math.max(1,document.documentElement.scrollHeight-innerHeight)).toFixed(3));tp.classList.toggle('on',y>700)},{passive:true})}
-addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();$('#nav').classList.remove('open')}});
+addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();$('#nav').classList.remove('open');$('#sbox').hidden=true}});
 /* ---------- shop grid ---------- */
 function card(p){const m=imgs(p);return `<a class="card" href="#/product/${esc(p.id)}"><div class="img">${onSale(p)?`<span class="badge">${pct(p)}% off</span>`:''}${out(p)?'<span class="sold">Sold out</span>':''}${m[0]?im(m[0]):''}${m[1]?im(m[1],'alt'):''}</div>
   <h3>${esc(p.name)}</h3><div class="price"><b class="${onSale(p)?'sale':''}">${money(p.price)}</b>${onSale(p)?`<s>${money(p.comparePrice)}</s>`:''}</div></a>`}
 function drawGrid(){
-  $('#shop').textContent=F.f==='All'?'New arrivals':F.f;
+  $('#shop').textContent=F.q?'Results for “'+F.q+'”':F.f==='All'?'New arrivals':F.f;
   document.querySelectorAll('nav [data-f]').forEach(b=>b.classList.toggle('on',b.dataset.f===F.f));
-  const base=products.filter(p=>F.f==='All'||(F.f==='Sale'?onSale(p):p.category===F.f));
+  const base=products.filter(p=>F.q||F.f==='All'||(F.f==='Sale'?onSale(p):p.category===F.f));
   const types=['All',...new Set(base.map(p=>p.type).filter(Boolean))];
   if(!types.includes(F.type))F.type='All';
   $('#chips').hidden=types.length<3;
   $('#chips').innerHTML=types.map(t=>`<button class="${t===F.type?'on':''}" data-t="${esc(t)}">${esc(t)}</button>`).join('');
   const q=F.q.toLowerCase();
-  const list=base.filter(p=>(F.type==='All'||p.type===F.type)&&(!q||(p.name||'').toLowerCase().includes(q)));
+  const list=base.filter(p=>(F.type==='All'||p.type===F.type)&&(!q||q.split(/\s+/).every(w=>hay(p).includes(w))));
   $('#grid').innerHTML=list.map(card).join('');rv();
   $('#msg').hidden=!!list.length;$('#msg').textContent=products.length?'Nothing matches. Try another filter.':'No products yet. Add some in admin.html.';
 }
@@ -799,6 +818,7 @@ async function lookup(ref,ph){
 /* ---------- events ---------- */
 const view=()=>location.hash.replace(/^#\/?/,'').split('/')[0]||'home';
 document.addEventListener('click',e=>{
+  if(!$('#sbox').hidden&&(!e.target.closest('#sbox,#sbtn')||e.target.closest('.sx')))$('#sbox').hidden=true;
   const t=e.target.closest('button');if(!t){if(!e.target.closest('#nav'))$('#nav').classList.remove('open');return}const d=t.dataset;
   if(t.id==='bg'){$('#nav').classList.toggle('open');return}$('#nav').classList.remove('open');
   if(d.drawer!==undefined){openDrawer();return}if(d.dclose!==undefined){closeDrawer();return}
@@ -830,14 +850,29 @@ document.addEventListener('click',e=>{
   else if(d.copy){navigator.clipboard&&navigator.clipboard.writeText(d.copy);toast('Copied')}
   else if(t.id==='place')placeOrder();
   else if(t.id==='print')window.print();
-  else if(t.id==='sbtn'){$('#sbox').hidden=!$('#sbox').hidden;if(!$('#sbox').hidden)$('#q').focus()}
+  else if(t.id==='sbtn'){$('#sbox').hidden=!$('#sbox').hidden;if(!$('#sbox').hidden){$('#q').focus();drawSearch()}}
+  else if(d.sall!==undefined){showAll()}
 });
 document.addEventListener('change',e=>{if(e.target.name==='pm'){payChoice=e.target.value;pPay()}});
 document.addEventListener('submit',e=>{if(e.target.id==='tf'){e.preventDefault();lookup($('#tr').value,$('#tp').value);return}
   if(e.target.id==='cf'){e.preventDefault();cust={name:$('#n').value.trim(),phone:$('#ph').value.trim(),email:$('#em').value.trim(),city:$('#ci').value.trim(),address:$('#ad').value.trim(),note:$('#nt').value.trim()};save();go('payment')}});
-$('#q').oninput=e=>{F.q=e.target.value;if(view()==='home')drawGrid();else{pendingScroll=true;location.hash='#/'}};
+const hay=p=>[p.name,p.type,p.category,p.description,p.brand].filter(Boolean).join(' ').toLowerCase();
+function drawSearch(){const raw=$('#q').value.trim(),q=raw.toLowerCase(),box=$('#sres');
+  if(!q){box.innerHTML='';return}
+  const hit=products.filter(p=>q.split(/\s+/).every(w=>hay(p).includes(w)));
+  box.innerHTML=hit.length?hit.slice(0,8).map(p=>{const m=imgs(p);return `<a class="sx" href="#/product/${esc(p.id)}"><span class="sxt">${m[0]?im(m[0]):''}</span><span><b>${esc(p.name)}</b><small>${money(p.price)}</small></span></a>`}).join('')+(hit.length>8?`<button class="sxa" data-sall>See all ${hit.length} results</button>`:''):`<p class="sxn">Nothing found for “${esc(raw)}”. Try another word.</p>`}
+function showAll(){const q=$('#q').value.trim();F.q='';F.f='All';F.type='All';F.q=q;$('#sbox').hidden=true;if(view()==='home'&&(location.hash===''||location.hash==='#/'||location.hash==='#/home')){drawGrid();$('#shop').scrollIntoView({behavior:'smooth'})}else{pendingScroll=true;location.hash='#/'}}
+$('#q').oninput=drawSearch;
+$('#q').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();showAll()}};
 addEventListener('hashchange',route);
 init();
 </script>
+<script>(function(){var $=function(s){return document.querySelector(s)};
+document.addEventListener('pointerdown',function(e){var n=$('#nav'),sb=$('#sbox'),t=e.target;
+ if(n&&n.classList.contains('open')&&!(t.closest&&t.closest('#nav,#bg')))n.classList.remove('open');
+ if(sb&&!sb.hidden&&!(t.closest&&t.closest('#sbox,#sbtn')))sb.hidden=true},true);
+var n=$('#nav');if(n)new MutationObserver(function(){document.body.classList.toggle('nav-open',n.classList.contains('open'))}).observe(n,{attributes:true,attributeFilter:['class']});
+var sb=$('#sbox'),h=$('header');function place(){if(sb&&h&&!sb.hidden)sb.style.top=(h.getBoundingClientRect().bottom+8)+'px'}
+if(sb){new MutationObserver(place).observe(sb,{attributes:true,attributeFilter:['hidden']});addEventListener('scroll',place,{passive:true});addEventListener('resize',place)}})();</script>
 </body>
 </html>
