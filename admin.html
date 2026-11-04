@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Store admin</title>
+<link rel="icon" href="favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#3f5c57;--bg:#f3f7f5;--card:#fff;--line:#dde6e3;--acc:#3f5c57;--on:#fff;--mut:#667a75}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.5 Nunito,system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+main{max-width:860px;margin:0 auto;padding:24px 5vw 80px}
+h1,h2,h3{font-family:Fredoka,Nunito,sans-serif;margin:0 0 12px}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 14px}
+button.p{background:var(--acc);color:var(--on);border-color:var(--acc);font-weight:600}
+button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+input,textarea,select{width:100%;font:inherit;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+label{display:block;margin:10px 0 4px;font-size:.9rem}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border:0}
+.mut{color:var(--mut);font-size:.9rem}
+.err{color:#b3261e}
+.ok{color:var(--acc)}
+#login{max-width:360px;margin:12vh auto;padding:0 5vw}
+@media(max-width:520px){.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<section id="login" hidden>
+  <img src="logo.png" alt="Chottu &amp; Co." style="height:56px;margin-bottom:8px"><h1>Store admin</h1>
+  <form id="lf">
+    <label for="em">Email</label><input id="em" type="email" required autocomplete="username">
+    <label for="pw">Password</label><input id="pw" type="password" required autocomplete="current-password">
+    <p class="err" id="le"></p>
+    <button class="p" style="width:100%">Log in</button>
+  </form>
+</section>
+
+<main id="app" hidden>
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <img src="logo.png" alt="Chottu &amp; Co. admin" style="height:42px"><button id="out">Log out</button>
+  </div>
+  <div class="bar">
+    <button data-t="orders" class="on">Orders</button>
+    <button data-t="products">Products</button>
+    <button data-t="settings">Settings</button>
+  </div>
+
+  <section id="t-orders"></section>
+
+  <section id="t-products" hidden>
+    <div class="box">
+      <h2 id="pf-title">Add a product</h2>
+      <form id="pf">
+        <label for="pn">Name</label><input id="pn" required>
+        <div class="two">
+          <div><label for="pp">Selling price</label><input id="pp" type="number" min="0" step="any" required></div>
+          <div><label for="pcp">Original price (only if on sale)</label><input id="pcp" type="number" min="0" step="any"></div>
+        </div>
+        <div class="two">
+          <div><label for="pc">For</label><select id="pc"><option>Boys</option><option>Girls</option></select></div>
+          <div><label for="pt">Type (e.g. T-Shirts, Sets, Frocks)</label><input id="pt"></div>
+        </div>
+        <label for="psz">Sizes, separated by commas (e.g. 2-3Y, 3-4Y, 4-5Y)</label><input id="psz">
+        <label for="pcol">Colors, separated by commas (optional, e.g. Red, Blue, White)</label><input id="pcol">
+        <div id="pvar"></div>
+        <label for="pi">Image links, one per line (the first is the main photo)</label><textarea id="pi" rows="3" placeholder="https://…"></textarea>
+        <label for="pd">Description</label><textarea id="pd" rows="3"></textarea>
+        <label for="pfe">Features, one per line</label><textarea id="pfe" rows="3"></textarea>
+        <label for="pca">Care instructions, one per line</label><textarea id="pca" rows="3"></textarea>
+        <div class="two">
+          <div id="pswrap"><label for="ps">Stock (leave blank for unlimited)</label><input id="ps" type="number" min="0"></div>
+          <div><label for="pa">Visible in store?</label><select id="pa"><option value="1">Yes</option><option value="0">Hidden</option></select></div>
+        </div>
+        <p class="ok" id="pm"></p>
+        <button class="p">Save product</button> <button type="button" id="pcancel" hidden>Cancel edit</button>
+      </form>
+    </div>
+    <div class="box">
+      <h2>Bulk add (many products at once)</h2>
+      <p class="mut">One product per line, parts separated by a | sign:<br>Name | Price | Original price | Boys or Girls | Type | Sizes | Image link | Description</p>
+      <textarea id="bulk" rows="5" placeholder="Space tee | 625 | 1250 | Boys | T-Shirts | 2-3Y, 3-4Y | https://… | Soft pure cotton"></textarea>
+      <p class="ok" id="bm"></p>
+      <button class="p" id="bgo">Add all</button>
+    </div>
+    <div class="box" id="plist"></div>
+  </section>
+
+  <section id="t-settings" hidden>
+    <div class="box">
+      <h2>Store settings</h2>
+      <p class="mut">These control your branding, banner, delivery fees and footer.</p>
+      <form id="sf"></form>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+import {firebaseConfig} from './firebase-config.js';
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import {getAuth,signInWithEmailAndPassword,onAuthStateChanged,signOut} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import {getFirestore,collection,getDocs,doc,getDoc,setDoc,addDoc,updateDoc,deleteDoc,query,orderBy,runTransaction,onSnapshot,serverTimestamp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+const $=s=>document.querySelector(s);
+const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const csv=t=>[...new Set(String(t||'').split(',').map(x=>x.trim()).filter(Boolean))];
+function buildVar(seed){
+  if(seed)$('#pvar').innerHTML='';
+  const sz=csv($('#psz').value),co=csv($('#pcol').value),keep={};
+  document.querySelectorAll('#pvar [data-vs]').forEach(i=>keep[i.dataset.vs+'||'+i.dataset.vc]=i.value);
+  (seed||[]).forEach(v=>keep[(v.size||'')+'||'+(v.color||'')]=v.stock==null?'':String(v.stock));
+  const box=$('#pvar');
+  if(!sz.length&&!co.length){box.innerHTML='';$('#pswrap').hidden=false;return}
+  $('#pswrap').hidden=true;
+  const rows=[];(sz.length?sz:['']).forEach(s=>(co.length?co:['']).forEach(c=>rows.push([s,c])));
+  box.innerHTML=`<label>Stock for each option (leave a box blank for unlimited, use 0 for sold out)</label><div style="border:1px solid var(--line);border-radius:8px;padding:6px 10px">`+
+    rows.map(([s,c])=>`<div class="row"><span>${[s&&'Size '+esc(s),c&&'Color '+esc(c)].filter(Boolean).join(' · ')}</span><input type="number" min="0" style="width:90px" data-vs="${esc(s)}" data-vc="${esc(c)}" value="${esc(keep[s+'||'+c]??'')}" aria-label="Stock"></div>`).join('')+`</div>`;
+}
+const readVar=()=>[...document.querySelectorAll('#pvar [data-vs]')].map(i=>({size:i.dataset.vs,color:i.dataset.vc,stock:i.value===''?null:Math.max(0,Math.floor(Number(i.value)))}));
+const sumVar=v=>v.some(x=>x.stock==null)?null:v.reduce((t,x)=>t+x.stock,0);
+$('#psz').oninput=$('#pcol').oninput=()=>buildVar();
+const L=t=>t.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+let products=[],editId=null,cur='Rs',SET={};
+
+onAuthStateChanged(auth,u=>{$('#login').hidden=!!u;$('#app').hidden=!u;if(u)loadAll()});
+$('#lf').onsubmit=async e=>{
+  e.preventDefault();$('#le').textContent='';
+  try{await signInWithEmailAndPassword(auth,$('#em').value.trim().toLowerCase(),$('#pw').value)}
+  catch{$('#le').textContent='Wrong email or password.'}
+};
+$('#out').onclick=()=>signOut(auth);
+document.querySelector('.bar').onclick=e=>{
+  const t=e.target.closest('button');if(!t)return;
+  document.querySelectorAll('.bar button').forEach(b=>b.classList.toggle('on',b===t));
+  ['orders','products','settings'].forEach(n=>$('#t-'+n).hidden=n!==t.dataset.t);
+};
+
+async function loadAll(){await loadSettings();await loadProducts();await loadOrders()}
+
+/* Orders (live) */
+const ORD=new Map();let seen=false,flt='all',unsub=null;
+const beep=()=>{try{const c=new AudioContext(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();o.stop(c.currentTime+.3)}catch{}};
+const MSG={confirmed:['Order confirmed','Your order is confirmed and being packed.'],shipped:['Your order is on its way','Your order has been shipped.'],delivered:['Order delivered','Your order has been delivered. Thank you for shopping with us!'],cancelled:['Order cancelled','Your order has been cancelled. Contact us if this is unexpected.']};
+const syncTrack=(id,d)=>setDoc(doc(db,'tracking',id),{...d,updatedAt:serverTimestamp()},{merge:true}).catch(()=>{});
+const mail=p=>SET.mailService&&SET.mailKey&&SET.mailCustTpl?fetch('https://api.emailjs.com/api/v1.0/email/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({service_id:SET.mailService,template_id:SET.mailCustTpl,user_id:SET.mailKey,template_params:{store_name:SET.name||'Chottu & Co.',...p}})}).then(async r=>{if(!r.ok)alert('Order status saved, but the customer email was not sent: '+(await r.text()))}).catch(()=>alert('Order status saved, but the customer email could not be sent (no connection).')):0;
+function loadOrders(){
+  if(unsub)return;
+  unsub=onSnapshot(query(collection(db,'orders'),orderBy('createdAt','desc')),snap=>{
+    if(seen)snap.docChanges().filter(c=>c.type==='added'&&!c.doc.metadata.hasPendingWrites).forEach(c=>{const o=c.doc.data();beep();document.title='New order! · Store admin';try{new Notification('New order '+(o.ref||''),{body:`${(o.customer||{}).name||''} · ${cur} ${Number(o.total).toLocaleString()}`})}catch{}});
+    seen=true;ORD.clear();snap.docs.forEach(d=>ORD.set(d.id,d.data()));drawOrders();
+  },()=>{$('#t-orders').innerHTML='<p class="err">Can’t read orders. Check that the admin email in your Firestore rules matches the email you logged in with.</p>'});
+  try{Notification.requestPermission()}catch{}
+}
+addEventListener('focus',()=>document.title='Store admin');
+function drawOrders(){
+  const box=$('#t-orders'),all=[...ORD.entries()];
+  if(!all.length){box.innerHTML='<p class="mut">No orders yet. New orders appear here instantly, with a sound.</p>';return}
+  box.innerHTML='<div class="bar">'+['all','new','confirmed','shipped','delivered','cancelled'].map(s=>`<button data-fl="${s}" class="${s===flt?'on':''}">${s} (${s==='all'?all.length:all.filter(([,o])=>o.status===s).length})</button>`).join('')+'</div>'+
+  all.filter(([,o])=>flt==='all'||o.status===flt).map(([id,o])=>{const c=o.customer||{},when=o.createdAt&&o.createdAt.toDate?o.createdAt.toDate().toLocaleString():'';
+    return `<div class="box"><div class="row"><strong>${esc(c.name)}</strong><span class="mut">${esc(o.ref||'')} ${esc(when)}</span></div>
+    <div>${(o.items||[]).map(i=>`${i.qty} × ${esc(i.name)}${[i.size,i.color].filter(Boolean).length?' ('+[i.size,i.color].filter(Boolean).map(esc).join(', ')+')':''}`).join('<br>')}</div>
+    <p><strong>Total: ${esc(cur)} ${Number(o.total).toLocaleString()}</strong>${o.promo?` <span class="mut">(code ${esc(o.promo)})</span>`:''}</p>
+    <p class="mut">${esc(c.phone)}${c.email?' · '+esc(c.email):''}<br>${esc(c.address)}${c.city?', '+esc(c.city):''}${o.note?'<br>Note: '+esc(o.note):''}</p>
+    <p class="mut">Payment: ${esc(o.paymentMethod||'not recorded')}${o.paymentRef?' · TID: '+esc(o.paymentRef):''}</p>
+    <div class="two"><div><label>Order status</label><select data-o="${id}">${['new','confirmed','shipped','delivered','cancelled'].map(s=>`<option ${s===o.status?'selected':''}>${s}</option>`).join('')}</select></div>
+    <div><label>Payment status</label><select data-pay="${id}"><option value="unpaid" ${o.paymentStatus!=='paid'?'selected':''}>Unpaid</option><option value="paid" ${o.paymentStatus==='paid'?'selected':''}>Paid</option></select></div></div>
+    <label>Courier and tracking number (shown to the customer)</label><div style="display:flex;gap:8px"><input data-cn="${id}" value="${esc(o.courierNote||'')}" placeholder="e.g. TCS 1234567890"><button data-cs="${id}">Save</button></div></div>`}).join('');
+}
+$('#t-orders').onclick=async e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.fl){flt=b.dataset.fl;drawOrders()}
+  if(b.dataset.cs){const id=b.dataset.cs,v=document.querySelector(`[data-cn="${id}"]`).value.trim();
+    try{await updateDoc(doc(db,'orders',id),{courierNote:v});syncTrack(id,{courierNote:v});b.textContent='Saved'}catch{alert('Could not save.')}}
+};
+async function adjustStock(items,sign){
+  const by={};(items||[]).forEach(i=>(by[i.id]=by[i.id]||[]).push(i));
+  for(const [pid,list] of Object.entries(by)){
+    const ref=doc(db,'products',pid);
+    try{await runTransaction(db,async tx=>{
+      const snap=await tx.get(ref);if(!snap.exists())return;const p=snap.data();
+      if(Array.isArray(p.variants)&&p.variants.length){
+        const v=p.variants.map(x=>({...x}));
+        list.forEach(i=>{const x=v.find(y=>(y.size||'')===(i.size||'')&&(y.color||'')===(i.color||''));if(x&&x.stock!=null)x.stock+=sign*i.qty});
+        tx.update(ref,{variants:v,stock:sumVar(v)});
+      }else if(p.stock!=null){tx.update(ref,{stock:p.stock+sign*list.reduce((t,i)=>t+i.qty,0)})}
+    })}catch{}
+  }
+}
+$('#t-orders').onchange=async e=>{
+  const el=e.target,id=el.dataset.o||el.dataset.pay;if(!id)return;
+  try{
+    if(el.dataset.pay){await updateDoc(doc(db,'orders',id),{paymentStatus:el.value});syncTrack(id,{paymentStatus:el.value});return}
+    const o=ORD.get(id),st=el.value,want=['confirmed','shipped','delivered'].includes(st);
+    if(want!==!!o.stockApplied)await adjustStock(o.items,want?-1:1);
+    await updateDoc(doc(db,'orders',id),{status:st,stockApplied:want});syncTrack(id,{status:st});
+    const m=MSG[st],c=o.customer||{};
+    if(m&&c.email)mail({to_email:c.email,customer_name:c.name,order_ref:o.ref,subject:`${m[0]} - ${o.ref}`,headline:m[0],message:m[1]+(st==='shipped'&&o.courierNote?' Courier: '+o.courierNote+'.':''),items_text:(o.items||[]).map(i=>`${i.qty} x ${i.name}`).join(', '),total:`${cur} ${Number(o.total).toLocaleString()}`,track_link:location.href.split('#')[0].replace(/admin\.html.*$/,'')+'index.html#/track/'+o.ref});
+    loadProducts();
+  }catch{alert('Could not update. Check your Firestore rules.');drawOrders()}
+};
+
+/* Products */
+async function loadProducts(){
+  try{const snap=await getDocs(collection(db,'products'));products=snap.docs.map(d=>({id:d.id,...d.data()}))}catch{products=[]}
+  $('#plist').innerHTML=products.length?`<h2>Your products (${products.length})</h2>`+products.map(p=>`<div class="row"><div>${esc(p.name)}<div class="mut">${esc(cur)} ${p.price}${p.category?' · '+esc(p.category):''}${p.active===false?' · hidden':''}${p.stock!=null?' · stock '+p.stock:''}</div></div>
+  <div><button data-e="${p.id}">Edit</button> <button data-x="${p.id}">Delete</button></div></div>`).join(''):'<p class="mut">No products yet.</p>';
+}
+$('#plist').onclick=async e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.x){if(confirm('Delete this product?')){await deleteDoc(doc(db,'products',b.dataset.x));loadProducts()}}
+  if(b.dataset.e){const p=products.find(x=>x.id===b.dataset.e);editId=p.id;
+    $('#pn').value=p.name;$('#pp').value=p.price;$('#pc').value=p.category||'Boys';$('#pt').value=p.type||'';$('#psz').value=p.sizes||'';$('#pcol').value=p.colors||'';$('#pcp').value=p.comparePrice??'';$('#pi').value=(Array.isArray(p.images)&&p.images.length?p.images:[p.image].filter(Boolean)).join('\n');$('#pfe').value=(p.features||[]).join('\n');$('#pca').value=(p.care||[]).join('\n');$('#pd').value=p.description||'';
+    $('#ps').value=Array.isArray(p.variants)&&p.variants.length?'':(p.stock??'');buildVar(p.variants||[]);$('#pa').value=p.active===false?'0':'1';
+    $('#pf-title').textContent='Edit product';$('#pcancel').hidden=false;scrollTo({top:0,behavior:'smooth'})}
+};
+function resetForm(){editId=null;$('#pf').reset();buildVar();$('#pf-title').textContent='Add a product';$('#pcancel').hidden=true}
+$('#pcancel').onclick=resetForm;
+$('#pf').onsubmit=async e=>{
+  e.preventDefault();
+  const data={name:$('#pn').value.trim(),price:Number($('#pp').value),category:$('#pc').value,type:$('#pt').value.trim(),sizes:$('#psz').value.trim(),comparePrice:$('#pcp').value===''?null:Number($('#pcp').value),images:L($('#pi').value),image:L($('#pi').value)[0]||'',features:L($('#pfe').value),care:L($('#pca').value),
+    description:$('#pd').value.trim(),stock:$('#ps').value===''?null:Number($('#ps').value),active:$('#pa').value==='1'};
+  const V=readVar();data.sizes=csv($('#psz').value).join(', ');data.colors=csv($('#pcol').value).join(', ');data.variants=V;if(V.length)data.stock=sumVar(V);
+  try{
+    editId?await setDoc(doc(db,'products',editId),data):await addDoc(collection(db,'products'),data);
+    $('#pm').textContent='Saved.';resetForm();loadProducts();setTimeout(()=>$('#pm').textContent='',2000);
+  }catch{$('#pm').textContent='Could not save. Check your Firestore rules.';$('#pm').className='err'}
+};
+$('#bgo').onclick=async()=>{
+  const lines=$('#bulk').value.split('\n').map(l=>l.trim()).filter(Boolean);let n=0;
+  for(const l of lines){
+    const [name,price,cp='',category='Boys',type='',sizes='',image='',description='']=l.split('|').map(s=>s.trim());
+    if(!name||isNaN(Number(price)))continue;
+    await addDoc(collection(db,'products'),{name,price:Number(price),comparePrice:cp===''?null:Number(cp),category:category==='Girls'?'Girls':'Boys',type,sizes,image,description,stock:null,active:true});n++;
+  }
+  $('#bm').textContent=`Added ${n} of ${lines.length} products.`;$('#bulk').value='';loadProducts();
+};
+
+/* Settings */
+const FIELDS=[
+['name','Store name','text'],['tagline','Tagline (footer)','text'],['currency','Currency symbol (e.g. Rs)','text'],
+['announcement','Top banner message','text'],
+['heroTitle','Main banner headline','text'],['heroSub','Main banner subtext','text'],['heroImage','Main banner image link','url'],
+['boysImage','Boys tile image link','url'],['girlsImage','Girls tile image link','url'],
+['shippingFee','Delivery fee','number'],['freeOver','Free delivery over (0 = never)','number'],
+['phone','Phone','text'],['whatsapp','WhatsApp number with country code, digits only','text'],['email','Email','text'],['address','Address','text'],
+['instagram','Instagram link','url'],['facebook','Facebook link','url'],
+['_h1','Payments','h'],['codEnabled','Offer cash on delivery?','yn'],['jcTitle','JazzCash account title','text'],['jcNumber','JazzCash number (leave empty to hide)','text'],['epTitle','Easypaisa account title','text'],['epNumber','Easypaisa number (leave empty to hide)','text'],['bankName','Bank name','text'],['bankTitle','Bank account title','text'],['bankAccount','Bank account number (leave empty to hide)','text'],['bankIban','IBAN','text'],['qrImage','Payment QR code picture (Raast, bank or wallet)','qr'],['_h2','Order alerts','h'],['ntfyTopic','Phone alert topic for the free ntfy app, a long random word like chottu-orders-7k2x9','text'],['mailService','EmailJS service ID','text'],['mailKey','EmailJS public key','text'],['mailOwnerTpl','EmailJS template ID: new order alert to you','text'],['mailCustTpl','EmailJS template ID: emails to customers','text'],['_h3','Other','h'],['payLabel','Name of the transfer option (e.g. Bank or wallet transfer)','text'],['paymentNote','Transfer instructions: bank/wallet details shown at checkout (leave empty to hide this option)','area'],['promos','Promo codes, one per line, like WELCOME10=10 for 10% off','area'],['sizeGuide','Size guide picture link','url'],['aboutText','Our story page','area'],['returnText','Return policy','area'],['shippingText','Shipping policy','area']];
+const FF=FIELDS.filter(f=>f[2]!=='h');
+$('#sf').innerHTML=FIELDS.map(([k,l,t])=>t==='h'?`<h3 style="margin:26px 0 0">${l}</h3>`:`<label for="s_${k}">${l}</label>`+(t==='qr'?`<input id="s_${k}" type="hidden"><input type="file" id="qrf" accept="image/*"><img id="qrp" alt="" style="max-width:160px;display:block;margin-top:8px" hidden> <button type="button" id="qrx">Remove QR</button>`:t==='area'?`<textarea id="s_${k}" rows="3"></textarea>`:t==='yn'?`<select id="s_${k}"><option value="yes">Yes</option><option value="no">No</option></select>`:`<input id="s_${k}" type="${t==='color'?'color':t==='number'?'number':'text'}"${t==='number'?' min="0"':''}>`)).join('')+'<p class="ok" id="sm"></p><button class="p">Save settings</button> <button type="button" id="stest">Send test alerts</button>';
+const showQr=()=>{const v=$('#s_qrImage').value;$('#qrp').hidden=!v;$('#qrp').src=v};
+$('#qrx').onclick=()=>{$('#s_qrImage').value='';$('#qrf').value='';showQr()};
+$('#qrf').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{const r=Math.min(1,600/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*r;c.height=im.height*r;c.getContext('2d').drawImage(im,0,0,c.width,c.height);$('#s_qrImage').value=c.toDataURL('image/png');showQr();$('#sm').textContent='QR ready. Press Save settings.'};im.src=URL.createObjectURL(f)};
+$('#stest').onclick=async()=>{const g=k=>$('#s_'+k).value.trim(),r=[];
+  const ej=async(tpl,params)=>{try{const x=await fetch('https://api.emailjs.com/api/v1.0/email/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({service_id:g('mailService'),template_id:tpl,user_id:g('mailKey'),template_params:params})});return x.ok?'OK':'failed ('+(await x.text()).slice(0,120)+')'}catch{return 'failed (no connection)'}};
+  if(g('ntfyTopic'))r.push(await fetch('https://ntfy.sh/'+encodeURIComponent(g('ntfyTopic')),{method:'POST',body:'Test alert from your store'}).then(x=>x.ok?'Phone alert sent.':'Phone alert failed (ntfy replied '+x.status+').').catch(()=>'Phone alert failed (cannot reach ntfy.sh from this network or browser).'));
+  if(g('mailService')&&g('mailKey')&&g('mailOwnerTpl'))r.push('Owner email: '+await ej(g('mailOwnerTpl'),{subject:'Test order alert',store_name:g('name')||'Test',order_ref:'TEST-001',items_text:'1 x Test item',total:cur+' 1',payment_method:'Test',customer_name:'Test',customer_phone:'0300',address:'Test',track_link:'#'}));
+  if(g('mailService')&&g('mailKey')&&g('mailCustTpl')&&auth.currentUser)r.push('Customer email to '+auth.currentUser.email+': '+await ej(g('mailCustTpl'),{to_email:auth.currentUser.email,store_name:g('name')||'Test',customer_name:'Test',order_ref:'TEST-001',subject:'Order confirmed - TEST-001',headline:'Order confirmed',message:'This is a test email.',items_text:'1 x Test item',total:cur+' 1',track_link:'#'}));
+  $('#sm').textContent=r.join(' ')||'Fill in a phone topic or EmailJS details first.'};
+async function loadSettings(){
+  try{const s=await getDoc(doc(db,'settings','store'));if(s.exists()){const d=s.data();
+    FF.forEach(([k])=>{if(d[k]!=null)$('#s_'+k).value=d[k]});showQr();cur=d.currency||cur;SET=d}}catch{}
+}
+$('#sf').onsubmit=async e=>{
+  e.preventDefault();const d={};
+  FF.forEach(([k,,t])=>{const v=$('#s_'+k).value;d[k]=t==='number'?Number(v||0):v});
+  d.currency=d.currency||'Rs';cur=d.currency;SET=d;
+  try{await setDoc(doc(db,'settings','store'),d);$('#sm').textContent='Saved.'}catch{$('#sm').textContent='Could not save. Check your Firestore rules.'}
+  setTimeout(()=>$('#sm').textContent='',2500);
+};
+</script>
+</body>
+</html>
