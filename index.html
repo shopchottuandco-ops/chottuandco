@@ -419,6 +419,45 @@ button.atc[data-addp]:disabled{background:#555;border-color:#555}
 body.pv footer{padding-bottom:96px}body.pv .toast{bottom:88px}
 @media(max-width:1100px){body.pv .wa{display:none}}
 body.pv #top{display:none}
+
+/* ===== v12: ONE text colour everywhere (logo's dark teal) + brand-yellow buttons; centred logo ===== */
+:root{--sale:#f3705e;--mut:#5f7a74;--acc:#e8a20d;--on:#3f5c57}
+body,.hero h2,.hero p,.tile h3,.ann{color:var(--ink)}
+
+/* logo always dead-centre of the floating bar, phone and computer */
+header .logo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);margin:0}
+
+/* announcement bar + sliding banner */
+.ann{background:#fff4dc;color:var(--ink)}
+.mq{background:var(--mu);color:var(--ink)}
+
+/* hero banner: ink text on a soft glass card instead of white text on the photo */
+.hero.has::before{display:none}
+.hero.has>div{background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);padding:28px 32px;border-radius:22px;border:1px solid rgba(255,255,255,.8)}
+.hero.has h2,.hero.has p{color:var(--ink)}
+
+/* category tiles: ink title on a white pill */
+.tile::before{background:none}
+.tile h3{background:rgba(255,255,255,.85);padding:6px 18px;border-radius:999px;color:var(--ink)}
+
+/* every button: brand yellow with ink text */
+button.p,.hero.has button.p,.tile button.p,#drawer .df .p,button.atc[data-addp]{background:var(--mu);border-color:var(--mu);color:var(--ink);box-shadow:none}
+button.p:hover:not(:disabled),.hero.has button.p:hover,button.atc[data-addp]:hover:not(:disabled),#drawer .df .p:hover{background:#f2b52e;border-color:#f2b52e;color:var(--ink)}
+button.atc[data-addp]{box-shadow:0 10px 30px rgba(232,162,13,.4)}
+button.atc[data-addp]:disabled{background:#e9e4d8;border-color:#e9e4d8;color:var(--mut)}
+#drawer .df .p{box-shadow:0 6px 16px rgba(232,162,13,.35)}
+#drawer .sc .pl{background:var(--mu);color:var(--ink)}
+.chips button.on,.sizes button[aria-pressed=true],.pi .sizes button[aria-pressed=true]{background:var(--mu);border-color:var(--ink);color:var(--ink)}
+#top{background:var(--mu);color:var(--ink)}
+
+/* small labels, toast, status colours */
+.badge,body.pv .badge{background:var(--mu);color:var(--ink)}
+.sold{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.toast{background:rgba(255,255,255,.92);color:var(--ink);border:1px solid var(--line);box-shadow:0 8px 24px rgba(63,92,87,.18)}
+.look{background:rgba(255,255,255,.8);color:var(--ink)}
+.er{color:var(--co)}.ok,.step.done{color:var(--gr)}
+.tag{background:#fff;color:var(--ink);border:1px solid var(--gr)}
+footer,footer p,footer button,footer .copy,footer h3{color:var(--ink)}
 </style>
 <script>document.documentElement.className="js"</script>
 </head>
@@ -568,7 +607,7 @@ addEventListener('scroll',()=>{const y=scrollY,n=sm?y>20:y>90;
   if(dn&&y>160&&!$('#nav').classList.contains('open')&&!$('#sbox').offsetParent)hd.classList.add('hide');else if(up||y<100)hd.classList.remove('hide');
   if(dn||up)ly=y;
   hd.style.setProperty('--p',(y/Math.max(1,document.documentElement.scrollHeight-innerHeight)).toFixed(3));tp.classList.toggle('on',y>700)},{passive:true})}
-addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer()});
+addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();$('#nav').classList.remove('open')}});
 /* ---------- shop grid ---------- */
 function card(p){const m=imgs(p);return `<a class="card" href="#/product/${esc(p.id)}"><div class="img">${onSale(p)?`<span class="badge">${pct(p)}% off</span>`:''}${out(p)?'<span class="sold">Sold out</span>':''}${m[0]?im(m[0]):''}${m[1]?im(m[1],'alt'):''}</div>
   <h3>${esc(p.name)}</h3><div class="price"><b class="${onSale(p)?'sale':''}">${money(p.price)}</b>${onSale(p)?`<s>${money(p.comparePrice)}</s>`:''}</div></a>`}
@@ -760,7 +799,7 @@ async function lookup(ref,ph){
 /* ---------- events ---------- */
 const view=()=>location.hash.replace(/^#\/?/,'').split('/')[0]||'home';
 document.addEventListener('click',e=>{
-  const t=e.target.closest('button');if(!t)return;const d=t.dataset;
+  const t=e.target.closest('button');if(!t){if(!e.target.closest('#nav'))$('#nav').classList.remove('open');return}const d=t.dataset;
   if(t.id==='bg'){$('#nav').classList.toggle('open');return}$('#nav').classList.remove('open');
   if(d.drawer!==undefined){openDrawer();return}if(d.dclose!==undefined){closeDrawer();return}
   if(d.dq){const [id,sz,co]=d.dq.split('__');add(id,sz,co,+d.d);renderDrawer();return}
