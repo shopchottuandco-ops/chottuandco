@@ -384,7 +384,8 @@ dialog.zm{width:min(900px,96vw);padding:12px}
       radial-gradient(110% 45% at 0% 100%,rgba(243,112,94,.22),transparent 60%),
       var(--glass);
     -webkit-backdrop-filter:blur(22px) saturate(1.7);backdrop-filter:blur(22px) saturate(1.7);
-    border-right:1px solid var(--glass-edge);box-shadow:8px 0 36px rgba(63,92,87,.2)}
+    border-right:1px solid var(--glass-edge);box-shadow:none}
+  nav.open{box-shadow:8px 0 36px rgba(63,92,87,.2)}
   nav button{color:var(--glass-ink);border-bottom:1px solid rgba(63,92,87,.14);display:flex;align-items:center;gap:12px}
   nav button::before{content:"";width:10px;height:10px;border-radius:50%;flex:none;background:var(--mu)}
   nav button:nth-child(4n+2)::before{background:var(--gr)}
@@ -396,6 +397,37 @@ dialog.zm{width:min(900px,96vw);padding:12px}
 @media(min-width:901px){
   header{background:rgba(255,255,255,.62);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);border-bottom:1px solid var(--glass-edge)}
 }
+
+/* ===== v10: floating pill top bar + floating centred Add to cart (Zellbury style) ===== */
+header{
+  position:sticky;top:12px;margin:12px 16px 0;padding:8px 22px;
+  border-radius:999px;border:1px solid var(--glass-edge,rgba(255,255,255,.75));
+  box-shadow:0 8px 28px rgba(63,92,87,.16);z-index:30}
+header.sm{padding-top:8px;padding-bottom:8px;box-shadow:0 8px 28px rgba(63,92,87,.16)}
+header.hide{transform:translateY(-150%)}
+header::after{left:24px;right:24px;bottom:3px;width:calc(var(--p,0)*(100% - 48px));border-radius:3px;height:3px}
+@media(min-width:901px){
+  header,header.sm{grid-template-columns:auto 1fr auto;grid-template-areas:"l n t";gap:0 22px}
+  header nav,header.sm nav{padding:0;justify-content:center}
+  header nav button,header.sm nav button{padding:10px 0}
+  header .logo img,header.sm .logo img{height:40px}
+}
+@media(max-width:900px){
+  header{top:8px;margin:8px 10px 0;padding:8px 14px;background:rgba(255,255,255,.88)}
+  header .logo img{height:36px}
+  body.pv header{position:relative;top:0;margin:0;padding:0 4vw;border-radius:0;border:0;box-shadow:none}
+}
+
+button.atc[data-addp]{
+  position:fixed;left:50%;right:auto;bottom:16px;transform:translateX(-50%);
+  width:min(590px,calc(100vw - 24px));margin:0;z-index:35;
+  background:#000;border:1px solid #000;color:#fff;border-radius:14px;padding:17px;
+  font-size:1rem;letter-spacing:0;text-transform:none;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+button.atc[data-addp]:hover:not(:disabled){background:#222;border-color:#222;color:#fff}
+button.atc[data-addp]:disabled{background:#555;border-color:#555}
+body.pv footer{padding-bottom:96px}body.pv .toast{bottom:88px}
+@media(max-width:1100px){body.pv .wa{display:none}}
+body.pv #top{display:none}
 </style>
 <script>document.documentElement.className="js"</script>
 </head>
