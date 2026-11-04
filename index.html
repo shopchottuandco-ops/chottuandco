@@ -575,7 +575,6 @@ body:not(.hm){padding-top:88px}
   <button class="ib" data-drawer aria-label="Open cart"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 13H6zM9 8a3 3 0 0 1 6 0"/></svg><span id="cnt">0</span></button></div>
 </header>
 <div class="search" id="sbox" hidden><input id="q" type="search" placeholder="Search products" aria-label="Search products" autocomplete="off"><div id="sres"></div></div>
-<nav class="steps" id="steps" aria-label="Checkout steps" hidden></nav>
 
 <div id="v-home">
 <section class="hero" id="hero"><div><h2 id="ht">New arrivals are here</h2><p id="hs"></p><button class="p" data-f="All">Shop now</button></div></section>
@@ -832,7 +831,6 @@ function route(){
   if(v==='receipt'&&!last)v='home';
   VIEWS.forEach(x=>{const e=$('#v-'+x);if(e)e.hidden=x!==v});
   const S4=[['cart','Cart'],['checkout','Your details'],['payment','Payment'],['receipt','Receipt']],i=S4.findIndex(s=>s[0]===v);
-  $('#steps').hidden=i<0;if(i>=0)$('#steps').innerHTML=S4.map((s,n)=>`<div class="step ${n===i?'on':n<i?'done':''}">${n+1}. ${s[1]}</div>`).join('');
   if(v==='home')drawGrid();
   if(v==='product')pProduct(arg);if(v==='cart')pCart();if(v==='checkout')pCheckout();if(v==='payment')pPay();if(v==='receipt')pReceipt();
   if(v==='page')pPage(arg);if(v==='track')pTrack(arg);
