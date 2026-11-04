@@ -541,6 +541,18 @@ body:not(.hm){padding-top:88px}
 .tkr{margin-top:16px;border-radius:12px;background:#fff}
 .tkr span{gap:10px;padding:14px 26px;font-size:.92rem}
 .tkr svg{width:20px;height:20px;stroke-width:1.8}
+/* ===== v18: Zellbury product gallery (photos side by side, no thumbnails) + fix squeezed gallery ===== */
+.pdp>*{min-width:0}
+.tkr{max-width:100%}
+@media(min-width:761px){
+ #v-product.page{max-width:1900px;padding:20px 2vw 72px}
+ .pdp{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:8px 40px}
+ .pdp>div:last-child{top:110px}
+ .gd.gz{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ .gd.gz.one{grid-template-columns:1fr}
+ .gd.gz .main{aspect-ratio:1/1.05;border-radius:0;width:100%}
+}
+@media(max-width:760px){.gd.gz{display:none}}
 </style>
 <script>document.documentElement.className="js"</script>
 </head>
@@ -767,7 +779,7 @@ function pProduct(id){
   el.innerHTML=`<div class="pdp"><div class="gwrap">
     <button class="shb" data-share aria-label="Share this product"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></button>
     ${onSale(p)?`<span class="badge">${pct(p)}% off</span>`:''}
-    <div class="gd ${m.length>1?'':'one'}">${m.length>1?`<div class="thumbs">${m.map((u,i)=>`<button class="${i===gal?'on':''}" data-gal="${i}" aria-label="Photo ${i+1}">${im(u)}</button>`).join('')}</div>`:''}<button class="main" data-zoom aria-label="Open image full screen">${m[gal]?im(m[gal]):''}</button></div>
+    <div class="gd gz ${m.length>1?'':'one'}">${m.map((u,i)=>`<button class="main" data-zoom="${i}" aria-label="Open photo ${i+1} full screen">${im(u)}</button>`).join('')}</div>
     <div class="mslides">${m.map(u=>`<div>${im(u)}</div>`).join('')}</div>${m.length>1?`<div class="mth">${m.map((u,i)=>`<button class="${i?'':'on'}" data-mg="${i}" aria-label="Photo ${i+1}">${im(u)}</button>`).join('')}</div>`:''}${rel.length?'<button class="look" data-look>Complete the look</button>':''}</div>
   <div class="pi"><div class="trow"><h1 class="pt">${esc(p.name)}</h1><div class="price pp"><b class="${onSale(p)?'sale':''}">${money(p.price)}</b>${onSale(p)?`<s>${money(p.comparePrice)}</s>`:''}</div></div>
     ${tg.length?`<div class="tg">${tg.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:''}
@@ -922,7 +934,7 @@ document.addEventListener('click',e=>{
   if(d.drawer!==undefined){openDrawer();return}if(d.dclose!==undefined){closeDrawer();return}
   if(d.dq){const [id,sz,co]=d.dq.split('__');add(id,sz,co,+d.d);renderDrawer();return}
   if(d.tab){document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b===t));document.querySelectorAll('.tp').forEach(x=>x.hidden=x.dataset.tp!==d.tab);return}
-  if(d.zoom!==undefined){const p=byId(location.hash.split('/')[2]),u=p&&imgs(p)[gal];if(u){$('#dlg').className='zm';$('#dv').innerHTML=`<img src="${esc(u)}" alt="" style="width:100%;display:block"><button style="margin-top:12px" data-close>Close</button>`;$('#dlg').showModal()}return}
+  if(d.zoom!==undefined){const p=byId(location.hash.split('/')[2]),u=p&&imgs(p)[+d.zoom||0];if(u){$('#dlg').className='zm';$('#dv').innerHTML=`<img src="${esc(u)}" alt="" style="width:100%;display:block"><button style="margin-top:12px" data-close>Close</button>`;$('#dlg').showModal()}return}
   if(d.mg!==undefined){const ms=document.querySelector('.mslides');if(ms)ms.scrollTo({left:ms.clientWidth*+d.mg,behavior:'smooth'});return}
   if(d.look!==undefined){const l=$('#look');if(l)l.scrollIntoView({behavior:'smooth'});return}
   if(d.dlook!==undefined){const g=$('#dsg');if(g)g.scrollIntoView({behavior:'smooth',block:'start'});return}
