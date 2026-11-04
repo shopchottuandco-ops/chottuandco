@@ -489,6 +489,25 @@ header,header.sm{margin-top:0}
 .cb[hidden]{display:none}
 #wa.cb{width:54px;height:54px;padding:0;font-size:0;background:rgba(255,255,255,.92);color:var(--ink);box-shadow:0 8px 24px rgba(63,92,87,.22)}
 #wa.cb:hover{background:var(--mu)}
+
+/* ===== v15: top bar floats OVER the page (big banner starts at the very top) and is frosted glass ===== */
+header,header.sm{position:fixed;top:12px;left:16px;right:16px;margin:0;width:auto;
+  background:transparent;border:1px solid rgba(255,255,255,.7);
+  box-shadow:0 8px 32px rgba(63,92,87,.2)}
+/* the glass lives on a layer behind the bar (a blur on the bar itself would trap the slide-out menu) */
+header::before{content:"";position:absolute;inset:0;border-radius:inherit;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(90% 160% at 0% 0%,rgba(232,162,13,.22),transparent 60%),
+    radial-gradient(80% 160% at 100% 100%,rgba(59,166,218,.2),transparent 65%),
+    rgba(255,247,226,.55);
+  -webkit-backdrop-filter:blur(22px) saturate(1.7);backdrop-filter:blur(22px) saturate(1.7)}
+@media(max-width:900px){header,header.sm{top:8px;left:10px;right:10px}}
+
+/* other pages start below the bar; the home page banner starts at the very top */
+body:not(.hm){padding-top:88px}
+@media(max-width:900px){body:not(.hm){padding-top:74px}}
+@media(max-width:760px){body.pv{padding-top:0}body.pv .shb{top:76px;right:14px}body.pv .badge{top:76px}}
+.hero{padding-top:70px}
 </style>
 <script>document.documentElement.className="js"</script>
 </head>
@@ -742,7 +761,7 @@ function route(){
   if(v==='home')drawGrid();
   if(v==='product')pProduct(arg);if(v==='cart')pCart();if(v==='checkout')pCheckout();if(v==='payment')pPay();if(v==='receipt')pReceipt();
   if(v==='page')pPage(arg);if(v==='track')pTrack(arg);
-  count();closeDrawer();rv();document.body.classList.toggle('pv',v==='product');
+  count();closeDrawer();rv();document.body.classList.toggle('pv',v==='product');document.body.classList.toggle('hm',v==='home');
   if(v==='home'&&pendingScroll){pendingScroll=false;$('#shop').scrollIntoView({behavior:'smooth'})}else if(!(v==='home'&&!location.hash))scrollTo(0,0);
 }
 function pPage(k){
@@ -890,7 +909,7 @@ $('#q').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();showAll()}};
 addEventListener('hashchange',route);
 init();
 </script>
-<script>(function(){var $=function(s){return document.querySelector(s)};
+<script>(function(){var $=function(s){return document.querySelector(s)};document.body.classList.toggle('hm',/^(#\/?(home)?)?$/.test(location.hash));
 document.addEventListener('pointerdown',function(e){var n=$('#nav'),sb=$('#sbox'),t=e.target;
  if(n&&n.classList.contains('open')&&!(t.closest&&t.closest('#nav,#bg')))n.classList.remove('open');
  if(sb&&!sb.hidden&&!(t.closest&&t.closest('#sbox,#sbtn')))sb.hidden=true},true);
