@@ -246,14 +246,15 @@ $('#bgo').onclick=async()=>{
 const FIELDS=[
 ['name','Store name','text'],['tagline','Tagline (footer)','text'],['currency','Currency symbol (e.g. Rs)','text'],
 ['announcement','Top banner message','text'],
+['productBanners','Product page rotating banner: one message per line, shown in order (leave empty for the default messages)','area'],
 ['heroTitle','Main banner headline','text'],['heroSub','Main banner subtext','text'],['heroImage','Main banner image link','url'],
 ['boysImage','Boys tile image link','url'],['girlsImage','Girls tile image link','url'],
 ['shippingFee','Delivery fee','number'],['freeOver','Free delivery over (0 = never)','number'],
 ['phone','Phone','text'],['whatsapp','WhatsApp number with country code, digits only','text'],['email','Email','text'],['address','Address','text'],
 ['instagram','Instagram link','url'],['facebook','Facebook link','url'],
-['_h1','Payments','h'],['codEnabled','Offer cash on delivery?','yn'],['jcTitle','JazzCash account title','text'],['jcNumber','JazzCash number (leave empty to hide)','text'],['epTitle','Easypaisa account title','text'],['epNumber','Easypaisa number (leave empty to hide)','text'],['bankName','Bank name','text'],['bankTitle','Bank account title','text'],['bankAccount','Bank account number (leave empty to hide)','text'],['bankIban','IBAN','text'],['qrImage','Payment QR code picture (Raast, bank or wallet)','qr'],['_h2','Order alerts','h'],['ntfyTopic','Phone alert topic for the free ntfy app, a long random word like chottu-orders-7k2x9','text'],['mailService','EmailJS service ID','text'],['mailKey','EmailJS public key','text'],['mailOwnerTpl','EmailJS template ID: new order alert to you','text'],['mailCustTpl','EmailJS template ID: emails to customers','text'],['_h3','Other','h'],['payLabel','Name of the transfer option (e.g. Bank or wallet transfer)','text'],['paymentNote','Transfer instructions: bank/wallet details shown at checkout (leave empty to hide this option)','area'],['promos','Promo codes, one per line, like WELCOME10=10 for 10% off','area'],['cartStyle','Cart popup direction','cart'],['sizeGuide','Size guide picture link','url'],['aboutText','Our story page','area'],['returnText','Return policy','area'],['shippingText','Shipping policy','area']];
+['_h1','Payments','h'],['codEnabled','Offer cash on delivery?','yn'],['jcTitle','JazzCash account title','text'],['jcNumber','JazzCash number (leave empty to hide)','text'],['epTitle','Easypaisa account title','text'],['epNumber','Easypaisa number (leave empty to hide)','text'],['bankName','Bank name','text'],['bankTitle','Bank account title','text'],['bankAccount','Bank account number (leave empty to hide)','text'],['bankIban','IBAN','text'],['qrImage','Payment QR code picture (Raast, bank or wallet)','qr'],['_h2','Order alerts','h'],['ntfyTopic','Phone alert topic for the free ntfy app, a long random word like chottu-orders-7k2x9','text'],['mailService','EmailJS service ID','text'],['mailKey','EmailJS public key','text'],['mailOwnerTpl','EmailJS template ID: new order alert to you','text'],['mailCustTpl','EmailJS template ID: emails to customers','text'],['_h3','Other','h'],['payLabel','Name of the transfer option (e.g. Bank or wallet transfer)','text'],['paymentNote','Transfer instructions: bank/wallet details shown at checkout (leave empty to hide this option)','area'],['promos','Promo codes, one per line, like WELCOME10=10 for 10% off','area'],['sizeGuide','Size guide picture link','url'],['aboutText','Our story page','area'],['returnText','Return policy','area'],['shippingText','Shipping policy','area']];
 const FF=FIELDS.filter(f=>f[2]!=='h');
-$('#sf').innerHTML=FIELDS.map(([k,l,t])=>t==='h'?`<h3 style="margin:26px 0 0">${l}</h3>`:`<label for="s_${k}">${l}</label>`+(t==='qr'?`<input id="s_${k}" type="hidden"><input type="file" id="qrf" accept="image/*"><img id="qrp" alt="" style="max-width:160px;display:block;margin-top:8px" hidden> <button type="button" id="qrx">Remove QR</button>`:t==='area'?`<textarea id="s_${k}" rows="3"></textarea>`:t==='cart'?`<select id="s_${k}"><option value="auto">Auto (bottom on strong phones, side on basic phones and computers)</option><option value="bottom">Always from the bottom</option><option value="side">Always from the side</option></select>`:t==='yn'?`<select id="s_${k}"><option value="yes">Yes</option><option value="no">No</option></select>`:`<input id="s_${k}" type="${t==='color'?'color':t==='number'?'number':'text'}"${t==='number'?' min="0"':''}>`)).join('')+'<p class="ok" id="sm"></p><button class="p">Save settings</button> <button type="button" id="stest">Send test alerts</button>';
+$('#sf').innerHTML=FIELDS.map(([k,l,t])=>t==='h'?`<h3 style="margin:26px 0 0">${l}</h3>`:`<label for="s_${k}">${l}</label>`+(t==='qr'?`<input id="s_${k}" type="hidden"><input type="file" id="qrf" accept="image/*"><img id="qrp" alt="" style="max-width:160px;display:block;margin-top:8px" hidden> <button type="button" id="qrx">Remove QR</button>`:t==='area'?`<textarea id="s_${k}" rows="3"></textarea>`:t==='yn'?`<select id="s_${k}"><option value="yes">Yes</option><option value="no">No</option></select>`:`<input id="s_${k}" type="${t==='color'?'color':t==='number'?'number':'text'}"${t==='number'?' min="0"':''}>`)).join('')+'<p class="ok" id="sm"></p><button class="p">Save settings</button> <button type="button" id="stest">Send test alerts</button>';
 const showQr=()=>{const v=$('#s_qrImage').value;$('#qrp').hidden=!v;$('#qrp').src=v};
 $('#qrx').onclick=()=>{$('#s_qrImage').value='';$('#qrf').value='';showQr()};
 $('#qrf').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{const r=Math.min(1,600/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*r;c.height=im.height*r;c.getContext('2d').drawImage(im,0,0,c.width,c.height);$('#s_qrImage').value=c.toDataURL('image/png');showQr();$('#sm').textContent='QR ready. Press Save settings.'};im.src=URL.createObjectURL(f)};
@@ -267,9 +268,31 @@ async function loadSettings(){
   try{const s=await getDoc(doc(db,'settings','store'));if(s.exists()){const d=s.data();
     FF.forEach(([k])=>{if(d[k]!=null)$('#s_'+k).value=d[k]});showQr();cur=d.currency||cur;SET=d}}catch{}
 }
+const CC={'1':[10,10,'USA/Canada'],'7':[10,10,'Russia/Kazakhstan'],'20':[10,10,'Egypt'],'27':[9,9,'South Africa'],'31':[9,9,'Netherlands'],'33':[9,9,'France'],'34':[9,9,'Spain'],'39':[9,11,'Italy'],'44':[10,10,'UK'],'45':[8,8,'Denmark'],'46':[7,10,'Sweden'],'47':[8,8,'Norway'],'49':[10,11,'Germany'],'52':[10,10,'Mexico'],'55':[10,11,'Brazil'],'60':[9,10,'Malaysia'],'61':[9,9,'Australia'],'62':[9,12,'Indonesia'],'63':[10,10,'Philippines'],'64':[8,10,'New Zealand'],'65':[8,8,'Singapore'],'81':[10,10,'Japan'],'82':[9,10,'South Korea'],'84':[9,10,'Vietnam'],'86':[11,11,'China'],'90':[10,10,'Turkey'],'91':[10,10,'India'],'92':[10,10,'Pakistan'],'93':[9,9,'Afghanistan'],'94':[9,9,'Sri Lanka'],'98':[10,10,'Iran'],'212':[9,9,'Morocco'],'234':[10,10,'Nigeria'],'251':[9,9,'Ethiopia'],'254':[9,9,'Kenya'],'353':[9,9,'Ireland'],'880':[10,10,'Bangladesh'],'961':[7,8,'Lebanon'],'962':[9,9,'Jordan'],'964':[10,10,'Iraq'],'965':[8,8,'Kuwait'],'966':[9,9,'Saudi Arabia'],'968':[8,8,'Oman'],'971':[9,9,'UAE'],'973':[8,8,'Bahrain'],'974':[8,8,'Qatar'],'977':[10,10,'Nepal']};
+const phoneErr=raw=>{let n=String(raw||'').replace(/[\s\-()]/g,'');
+  if(!n)return 'Phone number is required.';
+  if(/^03\d{9}$/.test(n))return '';
+  if(/^03/.test(n))return 'Local numbers must be 11 digits, like 0300 1234567.';
+  if(n.startsWith('00'))n='+'+n.slice(2);else if(/^92\d/.test(n))n='+'+n;
+  if(!/^\+\d+$/.test(n))return 'Enter 11 digits like 0300 1234567, or a number that starts with a country code like +92.';
+  const d=n.slice(1),k=[1,2,3].map(l=>d.slice(0,l)).find(c=>CC[c]);
+  if(!k)return d.length>=8&&d.length<=15?'':'Enter a valid number with country code (8 to 15 digits in total).';
+  const lo=CC[k][0],hi=CC[k][1],nm=CC[k][2],nat=d.slice(k.length);
+  if(nat.startsWith('0'))return 'Remove the 0 after +'+k+', like +'+k+nat.replace(/^0+/,'')+'.';
+  if(nat.length<lo||nat.length>hi)return 'A '+nm+' number (+'+k+') needs '+(lo===hi?lo:lo+' to '+hi)+' digits after the country code; you entered '+nat.length+'.';
+  if(k==='92'&&nat[0]!=='3')return 'Pakistan mobile numbers start with 3 after +92, like +92 300 1234567.';
+  return ''};
+//MAILRE-unused
+const MAILRE=/^[^\s@]+@([A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/;
+const vPhone=v=>phoneErr(v);
+const vMail=v=>!v||/^[^\s@]+@([A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/.test(v)?'':'Enter a valid email address ending with a domain, like name@example.com.';
 $('#sf').onsubmit=async e=>{
   e.preventDefault();const d={};
   FF.forEach(([k,,t])=>{const v=$('#s_'+k).value;d[k]=t==='number'?Number(v||0):v});
+  d.phone=d.phone.replace(/[\s\-()]/g,'');d.email=d.email.trim();
+  const bad=vPhone(d.phone)||vMail(d.email);
+  if(bad){$('#sm').style.color='#b3261e';$('#sm').textContent=bad;(vPhone(d.phone)?$('#s_phone'):$('#s_email')).focus();return}
+  $('#sm').style.color='';
   d.currency=d.currency||'Rs';cur=d.currency;SET=d;
   try{await setDoc(doc(db,'settings','store'),d);$('#sm').textContent='Saved.'}catch{$('#sm').textContent='Could not save. Check your Firestore rules.'}
   setTimeout(()=>$('#sm').textContent='',2500);
