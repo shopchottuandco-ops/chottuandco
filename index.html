@@ -313,6 +313,10 @@ dialog.zm{width:min(900px,96vw);padding:12px}
 #dov{background:rgba(0,0,0,.28)}
 #drawer{width:min(430px,calc(100vw - 52px))}
 @media(max-width:760px){.atc{left:12px;right:12px;bottom:14px;background:#000;border-color:#000;color:#fff}.atc:disabled{background:#555;border-color:#555}.pi{padding-top:14px}}
+
+/* ===== v7: really floating button (beats older button[data-addp] rules), lighter cart overlay ===== */
+@media(max-width:760px){button.atc[data-addp]{position:fixed;left:12px;right:12px;bottom:14px;width:auto;margin:0;z-index:9;box-shadow:0 8px 24px rgba(0,0,0,.3)}}
+#dov{background:rgba(0,0,0,.18)}
 </style>
 <script>document.documentElement.className="js"</script>
 </head>
