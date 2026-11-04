@@ -306,6 +306,13 @@ dialog.zm{width:min(900px,96vw);padding:12px}
  body.pv header .ib{width:38px;height:38px;padding:0;margin-top:10px;border-radius:50%;background:rgba(255,255,255,.88);box-shadow:0 2px 8px rgba(0,0,0,.15)}
  body.pv #bg{order:0;margin-right:8px}body.pv #sbtn{order:1}body.pv [data-drawer]{order:2;margin-left:auto}
 }
+
+/* ===== v6: tighter product spacing, floating button, narrower cart ===== */
+.tg{margin:10px 0 0}.opr{margin-top:12px}.pi .sizes{margin:8px 0 0;gap:10px}.strip{margin-top:12px}
+.atc svg{vertical-align:-3px;margin-right:8px}
+#dov{background:rgba(0,0,0,.28)}
+#drawer{width:min(430px,calc(100vw - 52px))}
+@media(max-width:760px){.atc{left:12px;right:12px;bottom:14px;background:#000;border-color:#000;color:#fff}.atc:disabled{background:#555;border-color:#555}.pi{padding-top:14px}}
 </style>
 <script>document.documentElement.className="js"</script>
 </head>
@@ -498,7 +505,7 @@ function pProduct(id){
     ${sz.length?`<div class="opr"><span><b>Size:</b> ${esc(c.size||'Select')}</span>${url(S.sizeGuide)?'<button class="link" data-guide>Size chart &amp; guide</button>':''}</div><div class="sizes">${sz.map(x=>`<button aria-pressed="${c.size===x}" data-size="${esc(x)}" ${okSize(x)?'':dis()}>${esc(x)}</button>`).join('')}</div>`:''}
     ${Number(S.freeOver)>0?`<div class="strip hl">Free delivery on orders over ${money(S.freeOver)}</div>`:Number(S.shippingFee)?`<div class="strip hl">Delivery ${money(S.shippingFee)}</div>`:''}
     ${S.codEnabled!=='no'?'<div class="strip">Cash on delivery available</div>':''}
-    <button class="p atc" data-addp="${esc(p.id)}" ${dead?'disabled':''}>${dead?'Sold out':co.length&&!c.color?'Select a color':sz.length&&!c.size?'Select a size':'Add to cart'}</button>
+    <button class="p atc" data-addp="${esc(p.id)}" ${dead?'disabled':''}>${dead?'Sold out':co.length&&!c.color?'Select a color':sz.length&&!c.size?'Select a size':`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 13H6zM9 8a3 3 0 0 1 6 0M12 12v5M9.5 14.5h5"/></svg>Add to cart`}</button>
     ${have!=null&&have>0&&have<=5?`<p class="er" style="margin:8px 0 0">Only ${have} left</p>`:''}
     ${have===0&&!out(p)?'<p class="er" style="margin:8px 0 0">This size and color is sold out. Please choose another.</p>':''}
     ${tabs.length?`<div class="tabs">${tabs.map((t,i)=>`<button class="${i?'':'on'}" data-tab="${t[0]}">${t[1]}</button>`).join('')}</div>${tabs.map((t,i)=>`<div class="tp" data-tp="${t[0]}" ${i?'hidden':''}>${panel[t[0]]}</div>`).join('')}`:''}
