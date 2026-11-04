@@ -344,23 +344,19 @@ dialog.zm{width:min(900px,96vw);padding:12px}
 #drawer.bs{top:auto;left:0;right:0;bottom:0;width:auto;height:86%;border-radius:22px 22px 0 0;border-left:0;border-top:1px solid rgba(255,255,255,.22);transform:translateY(105%);box-shadow:0 -12px 40px rgba(0,0,0,.35)}
 #drawer.bs.open{transform:none}
 #drawer.bs .hdl{display:block;width:42px;height:4px;border-radius:2px;background:rgba(255,255,255,.45);margin:8px auto 0}
-/* ===== v16: text address, colour tiles, rotating banner ===== */
+/* ===== v16: Zellbury-style colour tiles + marquee strip ===== */
 .adr{display:block;margin:0 0 12px;color:var(--ink);text-decoration:none;font-weight:600;line-height:1.4}.adr:hover{color:var(--co)}
-.pi .sizes button.ct{min-width:68px;height:68px;padding:5px;display:flex;align-items:flex-end;justify-content:center;text-align:center;font-size:.62rem;font-weight:700;line-height:1.1;border:1px solid rgba(0,0,0,.18);border-radius:6px}
-.pi .sizes button.ct[aria-pressed=true]{border-color:var(--ink);outline:2px solid var(--ink);outline-offset:2px}
-.pi .sizes button.ct:disabled{opacity:.4;text-decoration:line-through;cursor:not-allowed}
-.pbn{position:relative;margin-top:16px;height:68px;border-radius:8px;overflow:hidden;background:var(--mu)}
-.pbs{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:0 18px 8px;text-align:center;font:600 1rem Fredoka,sans-serif;color:var(--ink);opacity:0;transform:translateX(26px);transition:opacity .5s,transform .5s}
-.pbs.on{opacity:1;transform:none}
-.pbs:nth-child(4n+1){background:var(--mu)}
-.pbs:nth-child(4n+2){background:var(--gr);color:#fff}
-.pbs:nth-child(4n+3){background:var(--co);color:#fff}
-.pbs:nth-child(4n){background:var(--sk);color:var(--ink)}
-.pbs img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.pbd{position:absolute;left:0;right:0;bottom:6px;display:flex;justify-content:center;gap:5px;z-index:2}
-.pbd i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.7);box-shadow:0 0 2px rgba(0,0,0,.3);transition:width .2s}
-.pbd i.on{width:16px;border-radius:4px;background:#fff}
-@media(prefers-reduced-motion:reduce){.pbs{transition:none}}
+.pi .sizes.cl{gap:14px;margin:12px 0 4px}
+.pi .sizes button.ct{position:relative;width:32px;min-width:32px;height:32px;padding:0;border-radius:8px;border:1px solid rgba(0,0,0,.22);cursor:pointer}
+.pi .sizes button.ct[aria-pressed=true]{border-color:var(--ink);outline:1.5px solid var(--ink);outline-offset:2px}
+.pi .sizes button.ct:disabled{cursor:not-allowed}
+.pi .sizes button.ct:disabled::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(to top right,transparent calc(50% - 1px),#111 calc(50% - 1px) calc(50% + 1px),transparent calc(50% + 1px))}
+.pbn{margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+.pbt{display:inline-flex;white-space:nowrap;animation:pbm 24s linear infinite}
+.pbn:hover .pbt{animation-play-state:paused}
+.pbi{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;font-weight:600;font-size:.92rem;color:var(--ink);border-right:1px solid var(--line)}
+@keyframes pbm{to{transform:translateX(-25%)}}
+@media(prefers-reduced-motion:reduce){.pbt{animation:none}}
 </style>
 <script>document.documentElement.className="js"</script>
 </head>
@@ -448,9 +444,9 @@ const lum=c=>{try{const x=document.createElement('canvas').getContext('2d');x.fi
 const swatch=n=>{const k=String(n).trim().toLowerCase(),z=k.replace(/\s+/g,'');let bg=CMAP[k]||(CSS.supports('color',k)?k:CSS.supports('color',z)?z:null);
   if(!bg){let h=0;for(const ch of k)h=(h*31+ch.charCodeAt(0))%360;bg=`hsl(${h} 45% 70%)`}
   return{bg,fg:bg.startsWith('linear')||lum(bg)>150?'#1b2a2a':'#fff'}};
-const pbMsgs=()=>{const c=String(S.productBanners||'').split(/\r?\n/).map(s=>s.trim()).filter(Boolean);return c.length?c:[Number(S.freeOver)>0&&`Free delivery on orders over ${money(S.freeOver)}`,S.codEnabled!=='no'&&'Cash on delivery available',S.announcement,'Easy returns & exchange','Track your order online'].filter(Boolean)};
-const pbn=()=>{const m=pbMsgs();return `<div class="pbn" id="pbn">${m.map((t,i)=>`<div class="pbs ${i?'':'on'}">${url(t)?`<img src="${esc(t)}" alt="">`:`<span>${esc(t)}</span>`}</div>`).join('')}<div class="pbd">${m.map((t,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div></div>`};
-setInterval(()=>{const b=$('#pbn');if(!b)return;const s=[...b.querySelectorAll('.pbs')];if(s.length<2)return;let i=s.findIndex(x=>x.classList.contains('on'));s[i].classList.remove('on');i=(i+1)%s.length;s[i].classList.add('on');b.querySelectorAll('.pbd i').forEach((d,n)=>d.classList.toggle('on',n===i))},3500);
+const PBI=['<path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/>','<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>','<rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 9h18M9 21V9"/>','<circle cx="12" cy="12" r="3"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/>','<path d="M1 6h14v11H1zM15 10h4l3 3v4h-7"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/>'];
+const pbMsgs=()=>{const c=String(S.productBanners||'').split(/\r?\n/).map(s=>s.trim()).filter(Boolean);return c.length?c:['Easy Exchange','Quality Checked','Premium Fabric','Intricate Detailing',Number(S.freeOver)>0&&`Free delivery over ${money(S.freeOver)}`,S.codEnabled!=='no'&&'Cash on Delivery'].filter(Boolean)};
+const pbn=()=>{const m=pbMsgs(),one=m.map((t,i)=>`<span class="pbi"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PBI[i%PBI.length]}</svg>${esc(t)}</span>`).join('');return `<div class="pbn" aria-label="Store promises"><div class="pbt">${one}${one}${one}${one}</div></div>`};
 
 function brand(){
   $('#fname').textContent=S.name||'Chottu & Co.';document.title=S.name||'Chottu & Co.';
@@ -564,7 +560,7 @@ function pProduct(id){
     <div class="mslides">${m.map(u=>`<div>${im(u)}</div>`).join('')}</div>${m.length>1?`<div class="mth">${m.map((u,i)=>`<button class="${i?'':'on'}" data-mg="${i}" aria-label="Photo ${i+1}">${im(u)}</button>`).join('')}</div>`:''}${rel.length?'<button class="look" data-look>Complete the look</button>':''}</div>
   <div class="pi"><div class="trow"><h1 class="pt">${esc(p.name)}</h1><div class="price pp"><b class="${onSale(p)?'sale':''}">${money(p.price)}</b>${onSale(p)?`<s>${money(p.comparePrice)}</s>`:''}</div></div>
     ${tg.length?`<div class="tg">${tg.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:''}
-    ${co.length?`<div class="opr"><span><b>Color:</b> ${esc(c.color||'Select')}</span></div><div class="sizes">${co.map(x=>{const k=swatch(x);return `<button class="ct" aria-pressed="${c.color===x}" data-color="${esc(x)}" style="background:${k.bg};color:${k.fg}" ${okColor(x)?'':'disabled'}>${esc(x)}</button>`}).join('')}</div>`:''}
+    ${co.length?`<div class="opr"><span><b>Color:</b> ${esc(c.color||'Select')}</span></div><div class="sizes cl">${co.map(x=>{const k=swatch(x);return `<button class="ct" aria-pressed="${c.color===x}" data-color="${esc(x)}" title="${esc(x)}" aria-label="${esc(x)}" style="background:${k.bg}" ${okColor(x)?'':'disabled'}></button>`}).join('')}</div>`:''}
     ${sz.length?`<div class="opr"><span><b>Size:</b> ${esc(c.size||'Select')}</span>${url(S.sizeGuide)?'<button class="link" data-guide>Size chart &amp; guide</button>':''}</div><div class="sizes">${sz.map(x=>`<button aria-pressed="${c.size===x}" data-size="${esc(x)}" ${okSize(x)?'':dis()}>${esc(x)}</button>`).join('')}</div>`:''}
     ${pbn()}
     ${Number(S.freeOver)>0?`<div class="strip hl">Free delivery on orders over ${money(S.freeOver)}</div>`:Number(S.shippingFee)?`<div class="strip hl">Delivery ${money(S.shippingFee)}</div>`:''}
