@@ -558,6 +558,26 @@ body:not(.hm){padding-top:88px}
 .cadr svg{flex:none;width:20px;height:20px;margin-top:1px}
 .cadr span{text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(63,92,87,.35)}
 .cadr:hover span{text-decoration-color:var(--mu)}
+/* ===== v20: single-page checkout (Zellbury layout) ===== */
+#v-checkout.page{max-width:none;padding:0;margin:0}
+.co{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 100px)}
+.co-l{padding:36px 4vw 80px}.co-l .co-in{max-width:560px;margin-left:auto}
+.co-r{background:#f5f5f5;border-left:1px solid var(--line);padding:36px 4vw 80px}.co-r .co-in{max-width:460px;position:sticky;top:100px}
+.co h3{font:700 1.25rem Nunito,sans-serif;margin:26px 0 10px}.co h3:first-child{margin-top:0}
+.co input,.co textarea{border-radius:10px;background:#fff}
+.co .opt{border-radius:10px;background:#fff}.co .opt.sel{background:var(--soft)}
+.co .er{margin:4px 0 0;font-size:.88rem}
+.co-btn{width:100%;margin-top:16px;padding:16px;font-size:.95rem}
+.co .vc{display:block;margin:14px auto 0;border:0;background:none;color:var(--ink);text-decoration:underline;padding:0}
+.cs-i{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;margin-bottom:16px}
+.cs-t{position:relative;width:64px;height:64px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.cs-t img{width:100%;height:100%;object-fit:cover;border-radius:11px;display:block}
+.cs-q{position:absolute;top:-8px;right:-8px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#000;color:#fff;font-size:.75rem;font-weight:700;display:grid;place-items:center}
+.cs-n b{display:block;font-weight:600}.cs-n small{color:var(--mut)}
+.cs-d{display:flex;gap:10px;margin:20px 0 4px}.cs-d input{flex:1}.cs-d button{border-radius:10px;padding:0 18px;font-weight:700}
+.cs-l{display:flex;justify-content:space-between;padding:4px 0}
+.cs-tot{font-size:1.25rem;margin-top:10px;align-items:baseline}
+@media(max-width:900px){.co{grid-template-columns:1fr}.co-r{order:-1;border-left:0;border-bottom:1px solid var(--line);padding:24px 5vw}.co-l{padding:24px 5vw 90px}.co-in{max-width:none!important;position:static!important}}
 </style>
 <script>document.documentElement.className="js"</script>
 </head>
@@ -826,13 +846,13 @@ const VIEWS=['home','product','cart','checkout','payment','receipt','page','trac
 const go=v=>{location.hash='#/'+v};
 function route(){
   const [v0,arg]=location.hash.replace(/^#\/?/,'').split('/');let v=VIEWS.includes(v0)?v0:'home';
-  if((v==='checkout'||v==='payment')&&!items().length)v='cart';
-  if(v==='payment'&&!cust)v='checkout';
+  if(v==='payment')v='checkout';
+  if(v==='checkout'&&!items().length)v='cart';
   if(v==='receipt'&&!last)v='home';
   VIEWS.forEach(x=>{const e=$('#v-'+x);if(e)e.hidden=x!==v});
   const S4=[['cart','Cart'],['checkout','Your details'],['payment','Payment'],['receipt','Receipt']],i=S4.findIndex(s=>s[0]===v);
   if(v==='home')drawGrid();
-  if(v==='product')pProduct(arg);if(v==='cart')pCart();if(v==='checkout')pCheckout();if(v==='payment')pPay();if(v==='receipt')pReceipt();
+  if(v==='product')pProduct(arg);if(v==='cart')pCart();if(v==='checkout')pCheckout();if(v==='receipt')pReceipt();
   if(v==='page')pPage(arg);if(v==='track')pTrack(arg);
   count();closeDrawer();rv();document.body.classList.toggle('pv',v==='product');document.body.classList.toggle('hm',v==='home');
   if(v==='home'&&pendingScroll){pendingScroll=false;$('#shop').scrollIntoView({behavior:'smooth'})}else if(!(v==='home'&&!location.hash))scrollTo(0,0);
@@ -854,15 +874,44 @@ function pCart(){
     <div class="promo"><input id="pc" placeholder="Promo code" aria-label="Promo code" value="${esc(promo||'')}"><button id="applyPc">Apply</button></div><p class="note" id="pm"></p></div>
     <div>${summary(t)}<div class="acts"><button class="p" data-go="checkout">Proceed to checkout</button><button data-f="All">Keep shopping</button></div></div></div>`;
 }
+const CC={'1':[10,10,'USA/Canada'],'7':[10,10,'Russia/Kazakhstan'],'20':[10,10,'Egypt'],'27':[9,9,'South Africa'],'31':[9,9,'Netherlands'],'33':[9,9,'France'],'34':[9,9,'Spain'],'39':[9,11,'Italy'],'44':[10,10,'UK'],'45':[8,8,'Denmark'],'46':[7,10,'Sweden'],'47':[8,8,'Norway'],'49':[10,11,'Germany'],'52':[10,10,'Mexico'],'55':[10,11,'Brazil'],'60':[9,10,'Malaysia'],'61':[9,9,'Australia'],'62':[9,12,'Indonesia'],'63':[10,10,'Philippines'],'64':[8,10,'New Zealand'],'65':[8,8,'Singapore'],'81':[10,10,'Japan'],'82':[9,10,'South Korea'],'84':[9,10,'Vietnam'],'86':[11,11,'China'],'90':[10,10,'Turkey'],'91':[10,10,'India'],'92':[10,10,'Pakistan'],'93':[9,9,'Afghanistan'],'94':[9,9,'Sri Lanka'],'98':[10,10,'Iran'],'212':[9,9,'Morocco'],'234':[10,10,'Nigeria'],'251':[9,9,'Ethiopia'],'254':[9,9,'Kenya'],'353':[9,9,'Ireland'],'880':[10,10,'Bangladesh'],'961':[7,8,'Lebanon'],'962':[9,9,'Jordan'],'964':[10,10,'Iraq'],'965':[8,8,'Kuwait'],'966':[9,9,'Saudi Arabia'],'968':[8,8,'Oman'],'971':[9,9,'UAE'],'973':[8,8,'Bahrain'],'974':[8,8,'Qatar'],'977':[10,10,'Nepal']};
+const phoneErr=raw=>{let n=String(raw||'').replace(/[\s\-()]/g,'');
+  if(!n)return 'Phone number is required.';
+  if(/^03\d{9}$/.test(n))return '';
+  if(/^03/.test(n))return 'Local numbers must be 11 digits, like 0300 1234567.';
+  if(n.startsWith('00'))n='+'+n.slice(2);else if(/^92\d/.test(n))n='+'+n;
+  if(!/^\+\d+$/.test(n))return 'Enter 11 digits like 0300 1234567, or a number that starts with a country code like +92.';
+  const d=n.slice(1),k=[1,2,3].map(l=>d.slice(0,l)).find(c=>CC[c]);
+  if(!k)return d.length>=8&&d.length<=15?'':'Enter a valid number with country code (8 to 15 digits in total).';
+  const lo=CC[k][0],hi=CC[k][1],nm=CC[k][2],nat=d.slice(k.length);
+  if(nat.startsWith('0'))return 'Remove the 0 after +'+k+', like +'+k+nat.replace(/^0+/,'')+'.';
+  if(nat.length<lo||nat.length>hi)return 'A '+nm+' number (+'+k+') needs '+(lo===hi?lo:lo+' to '+hi)+' digits after the country code; you entered '+nat.length+'.';
+  if(k==='92'&&nat[0]!=='3')return 'Pakistan mobile numbers start with 3 after +92, like +92 300 1234567.';
+  return ''};
+const MAILRE=/^[^\s@]+@([A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/;
+function coSummary(){const t=totals(),it=items(),n=it.reduce((a,i)=>a+i.q,0);
+  return `${it.map(i=>{const m=imgs(i.p);return `<div class="cs-i"><div class="cs-t">${m[0]?im(m[0]):''}<span class="cs-q">${i.q}</span></div><div class="cs-n"><b>${esc(i.p.name)}</b>${opts(i)?`<small>${esc(opts(i))}</small>`:''}</div><span class="cs-p">${money(i.p.price*i.q)}</span></div>`}).join('')}
+  <div class="cs-d"><input id="cpc" placeholder="Discount code" aria-label="Discount code" value="${esc(promo||'')}"><button type="button" id="applyCo">Apply</button></div><p class="note" id="cpm"></p>
+  <div class="cs-l"><span>Subtotal · ${n} ${n===1?'item':'items'}</span><span>${money(t.sub)}</span></div>
+  ${t.disc?`<div class="cs-l ok"><span>Discount (${esc(promo)})</span><span>−${money(t.disc)}</span></div>`:''}
+  <div class="cs-l"><span>Shipping</span><span>${t.ship?money(t.ship):'Free'}</span></div>
+  <div class="cs-l cs-tot"><b>Total</b><b>${money(t.total)}</b></div>`}
+function paySec(){const m=methods();if(!payChoice||!m.find(x=>x.id===payChoice))payChoice=m[0].id;const cur=m.find(x=>x.id===payChoice);
+  return `${m.map(x=>`<label class="opt ${x.id===payChoice?'sel':''}"><input type="radio" name="pm" value="${esc(x.id)}" ${x.id===payChoice?'checked':''}><span><strong>${esc(x.label)}</strong>${x.id===payChoice?(x.html||`<div class="note">${esc(x.note)}</div>`):''}</span></label>`).join('')}
+  ${cur.ref?`<label for="payref">Transaction ID (TID) after you send <span id="paytot">${money(totals().total)}</span></label><input id="payref" autocomplete="off">`:''}`}
 function pCheckout(){const c=cust||{};
-  $('#v-checkout').innerHTML=`<h2>Your details</h2><div class="cols"><form class="box" id="cf"><h3>Delivery information</h3>
+  $('#v-checkout').innerHTML=`<form class="co" id="cf"><div class="co-l"><div class="co-in">
+  <h3>Contact</h3>
+  <label for="em">Email (optional)</label><input id="em" type="email" placeholder="name@example.com" autocomplete="email" value="${esc(c.email)}"><p class="er" id="eme"></p>
+  <h3>Delivery</h3>
   <label for="n">Full name</label><input id="n" required autocomplete="name" value="${esc(c.name)}">
-  <label for="ph">Phone number</label><input id="ph" type="tel" inputmode="tel" required placeholder="03XX XXXXXXX or +92…" autocomplete="tel" value="${esc(c.phone)}">
-  <label for="em">Email (optional)</label><input id="em" type="email" placeholder="name@example.com" autocomplete="email" value="${esc(c.email)}">
-  <label for="ci">City</label><input id="ci" required value="${esc(c.city)}">
+  <label for="ph">Phone number</label><input id="ph" type="tel" inputmode="tel" required placeholder="03XX XXXXXXX or +92…" autocomplete="tel" value="${esc(c.phone)}"><p class="er" id="phe"></p>
+  <label for="ci">City</label><input id="ci" required autocomplete="address-level2" value="${esc(c.city)}">
   <label for="ad">Delivery address</label><textarea id="ad" rows="3" required autocomplete="street-address">${esc(c.address)}</textarea>
   <label for="nt">Note (optional)</label><input id="nt" value="${esc(c.note)}">
-  <p class="er" id="cerr"></p><div class="acts"><button class="p" type="submit">Continue to payment</button><button type="button" data-go="cart">Back to cart</button></div></form>${summary(totals())}</div>`;
+  <h3>Payment</h3><div id="paysec">${paySec()}</div>
+  <p class="er" id="perr"></p><button class="p co-btn" id="place" type="submit">Place order</button><button type="button" class="vc" data-go="cart">← Return to cart</button>
+  </div></div><aside class="co-r"><div class="co-in" id="cosum">${coSummary()}</div></aside></form>`;
 }
 function methods(){const m=[],row=(k,v,c)=>v?`<div><span>${k}: <b>${esc(v)}</b></span>${c?`<button type="button" data-copy="${esc(v)}">Copy</button>`:''}</div>`:'';
   if(S.codEnabled!=='no')m.push({id:'Cash on delivery',label:'Cash on delivery',note:'Pay in cash when your order arrives.'});
@@ -872,12 +921,6 @@ function methods(){const m=[],row=(k,v,c)=>v?`<div><span>${k}: <b>${esc(v)}</b><
   if(qr())m.push({id:'QR payment',label:'Scan QR code',ref:true,html:`<img class="qr" src="${esc(qr())}" alt="Payment QR code"><div class="note">Scan with any bank or wallet app.</div>`});
   if(S.paymentNote)m.push({id:S.payLabel||'Other transfer',label:S.payLabel||'Other transfer',note:S.paymentNote,ref:true});
   if(!m.length)m.push({id:'To be arranged',label:'Arrange payment with us',note:'We will contact you after your order to arrange payment.'});return m}
-function pPay(){const m=methods();if(!payChoice||!m.find(x=>x.id===payChoice))payChoice=m[0].id;const cur=m.find(x=>x.id===payChoice);
-  $('#v-payment').innerHTML=`<h2>Payment</h2><div class="cols"><div class="box"><h3>Choose how to pay</h3>
-  ${m.map(x=>`<label class="opt ${x.id===payChoice?'sel':''}"><input type="radio" name="pm" value="${esc(x.id)}" ${x.id===payChoice?'checked':''}><span><strong>${esc(x.label)}</strong>${x.id===payChoice?(x.html||`<div class="note">${esc(x.note)}</div>`):''}</span></label>`).join('')}
-  ${cur.ref?`<label for="payref">Transaction ID (TID) after you send ${money(totals().total)}</label><input id="payref" autocomplete="off">`:''}
-  <p class="er" id="perr"></p><div class="acts"><button class="p" id="place">Place order</button><button data-go="checkout">Back</button></div></div>${summary(totals())}</div>`;
-}
 async function placeOrder(){
   const t=totals(),it=items();if(!it.length)return;
   const bad=it.find(i=>{const h=vstock(i.p,i.size,i.color);return h!=null&&i.q>h});
@@ -963,19 +1006,19 @@ document.addEventListener('click',e=>{
   else if(d.rm){delete cart[d.rm];save();pCart();count()}
   else if(t.id==='applyPc'){const c=$('#pc').value.trim().toUpperCase();if(c&&!PR()[c]){$('#pm').textContent='That code is not valid.';return}promo=c||null;save();pCart()}
   else if(d.copy){navigator.clipboard&&navigator.clipboard.writeText(d.copy);toast('Copied')}
-  else if(t.id==='place')placeOrder();
+  else if(t.id==='applyCo'){const c=$('#cpc').value.trim().toUpperCase();if(c&&!PR()[c]){$('#cpm').textContent='That code is not valid.';return}promo=c||null;save();$('#cosum').innerHTML=coSummary();const e=$('#paytot');if(e)e.textContent=money(totals().total)}
   else if(t.id==='print')window.print();
   else if(t.id==='sbtn'){$('#sbox').hidden=!$('#sbox').hidden;if(!$('#sbox').hidden){$('#q').focus();drawSearch()}}
   else if(d.sall!==undefined){showAll()}
 });
-document.addEventListener('change',e=>{if(e.target.name==='pm'){payChoice=e.target.value;pPay()}});
+document.addEventListener('change',e=>{if(e.target.name==='pm'){payChoice=e.target.value;$('#paysec').innerHTML=paySec()}});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='cpc'){e.preventDefault();$('#applyCo').click()}});
 document.addEventListener('submit',e=>{if(e.target.id==='tf'){e.preventDefault();lookup($('#tr').value,$('#tp').value);return}
   if(e.target.id==='cf'){e.preventDefault();
-  {const ph=$('#ph').value.replace(/[\s\-()]/g,''),em=$('#em').value.trim(),er=$('#cerr');
-   if(!(/^03\d{9}$/.test(ph)||/^\+\d{9,15}$/.test(ph)||/^00\d{9,15}$/.test(ph)||/^923\d{9}$/.test(ph))){er.textContent='Enter a phone number with 11 digits like 0300 1234567, or start with a country code like +92.';$('#ph').focus();return}
-   if(em&&!/^[^\s@]+@([A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/.test(em)){er.textContent='Enter a valid email address ending with a domain, like name@example.com.';$('#em').focus();return}
-   er.textContent=''}
-  cust={name:$('#n').value.trim(),phone:$('#ph').value.replace(/[\s\-()]/g,''),email:$('#em').value.trim(),city:$('#ci').value.trim(),address:$('#ad').value.trim(),note:$('#nt').value.trim()};save();go('payment')}});
+  const ph=$('#ph').value.replace(/[\s\-()]/g,''),em=$('#em').value.trim(),pe=phoneErr(ph),ee=em&&!MAILRE.test(em)?'Enter a valid email address ending with a domain, like name@example.com.':'';
+  $('#phe').textContent=pe;$('#eme').textContent=ee;
+  if(pe){$('#ph').focus();return}if(ee){$('#em').focus();return}
+  cust={name:$('#n').value.trim(),phone:ph,email:em,city:$('#ci').value.trim(),address:$('#ad').value.trim(),note:$('#nt').value.trim()};save();placeOrder()}});
 const hay=p=>[p.name,p.type,p.category,p.description,p.brand].filter(Boolean).join(' ').toLowerCase();
 function drawSearch(){const raw=$('#q').value.trim(),q=raw.toLowerCase(),box=$('#sres');
   if(!q){box.innerHTML='';return}
