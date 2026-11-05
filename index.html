@@ -578,6 +578,29 @@ body:not(.hm){padding-top:88px}
 .cs-l{display:flex;justify-content:space-between;padding:4px 0}
 .cs-tot{font-size:1.25rem;margin-top:10px;align-items:baseline}
 @media(max-width:900px){.co{grid-template-columns:1fr}.co-r{order:-1;border-left:0;border-bottom:1px solid var(--line);padding:24px 5vw}.co-l{padding:24px 5vw 90px}.co-in{max-width:none!important;position:static!important}}
+/* ===== v21: product page = only menu + search buttons; glass photo viewer; static checkout header; flag; city select ===== */
+body.pv{padding-top:0}
+body.pv header,body.pv header.sm,body.pv header.hide{position:fixed;top:12px;left:12px;right:auto;width:auto;padding:0;margin:0;border:0;background:none;box-shadow:none;display:flex;align-items:center;gap:10px;transform:none;opacity:1;pointer-events:none}
+body.pv header::before,body.pv header::after{display:none}
+body.pv header .logo{display:none}
+body.pv header .tools{display:contents}
+body.pv header .tools>button:not(#sbtn){display:none}
+body.pv header #bg,body.pv header #sbtn{pointer-events:auto;width:40px;height:40px;padding:0;border-radius:50%;background:rgba(255,255,255,.88);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 2px 12px rgba(63,92,87,.22)}
+body.pv header #bg svg,body.pv header #sbtn svg{width:20px;height:20px}
+body.pv header nav{pointer-events:auto}
+body.pv .badge{top:62px}
+body.pv .shb{top:12px;right:12px}
+dialog.zm{background:transparent;border:0;padding:0;margin:0;width:100%;max-width:none;height:100%;max-height:none;overflow:hidden;align-items:center;justify-content:center}
+dialog.zm[open]{display:flex}
+dialog.zm #dv{display:contents}
+dialog.zm img{display:block;width:auto;height:auto;max-width:94vw;max-height:94vh;object-fit:contain;border-radius:10px;box-shadow:0 18px 50px rgba(63,92,87,.35);cursor:default}
+dialog.zm::backdrop{background:radial-gradient(120% 60% at 0% 0%,rgba(232,162,13,.28),transparent 60%),radial-gradient(90% 55% at 100% 35%,rgba(59,166,218,.24),transparent 65%),radial-gradient(100% 55% at 0% 100%,rgba(243,112,94,.24),transparent 60%),rgba(255,247,226,.5);-webkit-backdrop-filter:blur(22px) saturate(1.7);backdrop-filter:blur(22px) saturate(1.7)}
+body.ck header,body.ck header.sm,body.ck header.hide{position:absolute;transform:none;opacity:1;pointer-events:auto}
+body.ck .co-r .co-in{top:24px}
+.phw{position:relative}
+.phw .flg{position:absolute;left:12px;top:50%;transform:translateY(-50%);display:flex;line-height:0;pointer-events:none}
+.phw.hasf input{padding-left:50px}
+.co select{border-radius:10px;background:#fff}
 </style>
 <script>document.documentElement.className="js"</script>
 </head>
@@ -854,7 +877,7 @@ function route(){
   if(v==='home')drawGrid();
   if(v==='product')pProduct(arg);if(v==='cart')pCart();if(v==='checkout')pCheckout();if(v==='receipt')pReceipt();
   if(v==='page')pPage(arg);if(v==='track')pTrack(arg);
-  count();closeDrawer();rv();document.body.classList.toggle('pv',v==='product');document.body.classList.toggle('hm',v==='home');
+  count();closeDrawer();rv();document.body.classList.toggle('pv',v==='product');document.body.classList.toggle('hm',v==='home');document.body.classList.toggle('ck',v==='checkout');
   if(v==='home'&&pendingScroll){pendingScroll=false;$('#shop').scrollIntoView({behavior:'smooth'})}else if(!(v==='home'&&!location.hash))scrollTo(0,0);
 }
 function pPage(k){
@@ -889,6 +912,11 @@ const phoneErr=raw=>{let n=String(raw||'').replace(/[\s\-()]/g,'');
   if(k==='92'&&nat[0]!=='3')return 'Pakistan mobile numbers start with 3 after +92, like +92 300 1234567.';
   return ''};
 const MAILRE=/^[^\s@]+@([A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/;
+const ISO={'1':'us','7':'ru','20':'eg','27':'za','31':'nl','33':'fr','34':'es','39':'it','44':'gb','45':'dk','46':'se','47':'no','49':'de','52':'mx','55':'br','60':'my','61':'au','62':'id','63':'ph','64':'nz','65':'sg','81':'jp','82':'kr','84':'vn','86':'cn','90':'tr','91':'in','92':'pk','93':'af','94':'lk','98':'ir','212':'ma','234':'ng','251':'et','254':'ke','353':'ie','880':'bd','961':'lb','962':'jo','964':'iq','965':'kw','966':'sa','968':'om','971':'ae','973':'bh','974':'qa','977':'np'};
+const phoneCountry=raw=>{let n=String(raw||'').replace(/[\s\-()]/g,'');if(n.startsWith('00'))n='+'+n.slice(2);else if(/^92\d/.test(n))n='+'+n;if(!n.startsWith('+'))return null;const d=n.slice(1),k=[1,2,3].map(l=>d.slice(0,l)).find(c=>CC[c]);return k?{k,iso:ISO[k],name:CC[k][2]}:null};
+function flag(){const i=$('#ph'),el=$('#flg');if(!i||!el)return;const f=phoneCountry(i.value);el.hidden=!f;i.parentNode.classList.toggle('hasf',!!f);el.innerHTML=f?`<img src="https://flagcdn.com/24x18/${f.iso}.png" srcset="https://flagcdn.com/48x36/${f.iso}.png 2x" width="24" height="18" alt="${esc(f.name)}" title="${esc(f.name)}">`:''}
+const DCITIES=['Karachi','Lahore','Islamabad','Rawalpindi','Faisalabad','Multan','Hyderabad','Gujranwala','Peshawar','Quetta','Sialkot','Bahawalpur','Sargodha','Sukkur','Larkana','Sheikhupura','Gujrat','Jhelum','Mardan','Abbottabad','Sahiwal','Rahim Yar Khan','Okara','Dera Ghazi Khan','Kasur','Wah Cantt','Mirpur (AJK)','Muzaffarabad'];
+const cities=()=>{const c=String(S.cities||'').split(/\r?\n/).map(t=>t.trim()).filter(Boolean);return c.length?c:DCITIES};
 function coSummary(){const t=totals(),it=items(),n=it.reduce((a,i)=>a+i.q,0);
   return `${it.map(i=>{const m=imgs(i.p);return `<div class="cs-i"><div class="cs-t">${m[0]?im(m[0]):''}<span class="cs-q">${i.q}</span></div><div class="cs-n"><b>${esc(i.p.name)}</b>${opts(i)?`<small>${esc(opts(i))}</small>`:''}</div><span class="cs-p">${money(i.p.price*i.q)}</span></div>`}).join('')}
   <div class="cs-d"><input id="cpc" placeholder="Discount code" aria-label="Discount code" value="${esc(promo||'')}"><button type="button" id="applyCo">Apply</button></div><p class="note" id="cpm"></p>
@@ -905,13 +933,13 @@ function pCheckout(){const c=cust||{};
   <label for="em">Email (optional)</label><input id="em" type="email" placeholder="name@example.com" autocomplete="email" value="${esc(c.email)}"><p class="er" id="eme"></p>
   <h3>Delivery</h3>
   <label for="n">Full name</label><input id="n" required autocomplete="name" value="${esc(c.name)}">
-  <label for="ph">Phone number</label><input id="ph" type="tel" inputmode="tel" required placeholder="03XX XXXXXXX or +92…" autocomplete="tel" value="${esc(c.phone)}"><p class="er" id="phe"></p>
-  <label for="ci">City</label><input id="ci" required autocomplete="address-level2" value="${esc(c.city)}">
+  <label for="ph">Phone number</label><div class="phw"><span class="flg" id="flg" hidden></span><input id="ph" type="tel" inputmode="tel" required placeholder="03XX XXXXXXX or +92…" autocomplete="tel" value="${esc(c.phone)}"></div><p class="er" id="phe"></p>
+  <label for="ci">City</label><select id="ci" required autocomplete="address-level2"><option value="">Select your city</option>${cities().map(x=>`<option ${c.city===x?'selected':''}>${esc(x)}</option>`).join('')}</select>
   <label for="ad">Delivery address</label><textarea id="ad" rows="3" required autocomplete="street-address">${esc(c.address)}</textarea>
   <label for="nt">Note (optional)</label><input id="nt" value="${esc(c.note)}">
   <h3>Payment</h3><div id="paysec">${paySec()}</div>
   <p class="er" id="perr"></p><button class="p co-btn" id="place" type="submit">Place order</button><button type="button" class="vc" data-go="cart">← Return to cart</button>
-  </div></div><aside class="co-r"><div class="co-in" id="cosum">${coSummary()}</div></aside></form>`;
+  </div></div><aside class="co-r"><div class="co-in" id="cosum">${coSummary()}</div></aside></form>`;flag();
 }
 function methods(){const m=[],row=(k,v,c)=>v?`<div><span>${k}: <b>${esc(v)}</b></span>${c?`<button type="button" data-copy="${esc(v)}">Copy</button>`:''}</div>`:'';
   if(S.codEnabled!=='no')m.push({id:'Cash on delivery',label:'Cash on delivery',note:'Pay in cash when your order arrives.'});
@@ -982,7 +1010,7 @@ document.addEventListener('click',e=>{
   if(d.drawer!==undefined){openDrawer();return}if(d.dclose!==undefined){closeDrawer();return}
   if(d.dq){const [id,sz,co]=d.dq.split('__');add(id,sz,co,+d.d);renderDrawer();return}
   if(d.tab){document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b===t));document.querySelectorAll('.tp').forEach(x=>x.hidden=x.dataset.tp!==d.tab);return}
-  if(d.zoom!==undefined){const p=byId(location.hash.split('/')[2]),u=p&&imgs(p)[+d.zoom||0];if(u){$('#dlg').className='zm';$('#dv').innerHTML=`<img src="${esc(u)}" alt="" style="width:100%;display:block"><button style="margin-top:12px" data-close>Close</button>`;$('#dlg').showModal()}return}
+  if(d.zoom!==undefined){const p=byId(location.hash.split('/')[2]),u=p&&imgs(p)[+d.zoom||0];if(u){$('#dlg').className='zm';$('#dv').innerHTML=`<img src="${esc(u)}" alt="">`;$('#dlg').showModal()}return}
   if(d.mg!==undefined){const ms=document.querySelector('.mslides');if(ms)ms.scrollTo({left:ms.clientWidth*+d.mg,behavior:'smooth'});return}
   if(d.look!==undefined){const l=$('#look');if(l)l.scrollIntoView({behavior:'smooth'});return}
   if(d.dlook!==undefined){const g=$('#dsg');if(g)g.scrollIntoView({behavior:'smooth',block:'start'});return}
@@ -1012,6 +1040,7 @@ document.addEventListener('click',e=>{
   else if(d.sall!==undefined){showAll()}
 });
 document.addEventListener('change',e=>{if(e.target.name==='pm'){payChoice=e.target.value;$('#paysec').innerHTML=paySec()}});
+document.addEventListener('input',e=>{if(e.target.id==='ph')flag()});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='cpc'){e.preventDefault();$('#applyCo').click()}});
 document.addEventListener('submit',e=>{if(e.target.id==='tf'){e.preventDefault();lookup($('#tr').value,$('#tp').value);return}
   if(e.target.id==='cf'){e.preventDefault();
